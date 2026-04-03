@@ -2,19 +2,22 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 
 import { executeBuild } from '../build/execute';
-import { loadConfig } from '../config/config';
+import { CONFIG_ENV_VAR, getWritableConfigPath, loadConfig, resolveConfigPath } from '../config/config';
 import { BuildType } from '../types';
 import { banner, fatal } from '../ui/output';
 import { promptBuild, runConfigInit, runProjectAdd } from '../ui/prompts';
 
 export async function runCli(argv: string[]): Promise<void> {
-  const config = loadConfig();
+  const resolvedConfigPath = resolveConfigPath(argv);
+  const writableConfigPath = getWritableConfigPath(resolvedConfigPath);
+  const config = loadConfig(resolvedConfigPath);
   const program = new Command();
 
   program
     .name('delphi')
     .description('CLI de build local para projetos Delphi do Bimer')
-    .version('1.0.0');
+    .version('1.0.0')
+    .option('-c, --config <path>', `Caminho do arquivo de configuração (ou ${CONFIG_ENV_VAR})`);
 
   program
     .command('build')
@@ -50,8 +53,8 @@ export async function runCli(argv: string[]): Promise<void> {
 
   configCmd
     .command('init')
-    .description('Configura o ambiente de forma interativa (cria bimer.config.json)')
-    .action(() => runConfigInit(config));
+    .description('Configura o ambiente de forma interativa (cria bbuilder.config.json)')
+    .action(() => runConfigInit(config, writableConfigPath));
 
   configCmd
     .command('show')
@@ -60,6 +63,8 @@ export async function runCli(argv: string[]): Promise<void> {
       console.log('');
       console.log(chalk.cyan('  Configuração Atual'));
       console.log(chalk.blue('  ──────────────────'));
+      console.log(chalk.gray(`  Arquivo: ${resolvedConfigPath}`));
+      console.log('');
       console.log(JSON.stringify(config, null, 2)
         .split('\n')
         .map(line => '  ' + line)
@@ -74,7 +79,7 @@ export async function runCli(argv: string[]): Promise<void> {
   projectCmd
     .command('add')
     .description('Adiciona um novo projeto à lista')
-    .action(() => runProjectAdd(config));
+    .action(() => runProjectAdd(config, writableConfigPath));
 
   projectCmd
     .command('list')

@@ -1,9 +1,12 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 
 import { Config } from '../types';
 
-export const CONFIG_FILE = path.join(process.cwd(), 'bimer.config.json');
+export const CONFIG_FILENAME = 'bbuilder.config.json';
+export const LEGACY_CONFIG_FILENAME = 'bimer.config.json';
+export const CONFIG_ENV_VAR = 'BBUILDER_CONFIG';
 
 const DEFAULT_CONFIG_BASE = {
   repoBase: 'C:\\git\\bimer',
@@ -81,10 +84,64 @@ function normalizeProjects(projects: unknown): Record<string, string> {
   return { ...DEFAULT_CONFIG.projects };
 }
 
-export function loadConfig(): Config {
-  if (fs.existsSync(CONFIG_FILE)) {
+function getUserConfigDirectory(): string {
+  if (process.platform === 'win32') {
+    const appData = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
+    return path.join(appData, 'bbuilder-cli');
+  }
+
+  const xdgConfig = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
+  return path.join(xdgConfig, 'bbuilder-cli');
+}
+
+export function getDefaultConfigPath(): string {
+  return path.join(getUserConfigDirectory(), CONFIG_FILENAME);
+}
+
+export function getWritableConfigPath(configPath: string): string {
+  if (path.basename(configPath) === LEGACY_CONFIG_FILENAME) {
+    return path.join(path.dirname(configPath), CONFIG_FILENAME);
+  }
+
+  return configPath;
+}
+
+export function resolveConfigPath(argv: string[] = process.argv): string {
+  for (let index = 0; index < argv.length; index++) {
+    const current = argv[index];
+
+    if (current === '--config' || current === '-c') {
+      const next = argv[index + 1];
+      if (next) return path.resolve(next);
+    }
+
+    if (current.startsWith('--config=')) {
+      return path.resolve(current.slice('--config='.length));
+    }
+  }
+
+  const envPath = process.env[CONFIG_ENV_VAR];
+  if (envPath) {
+    return path.resolve(envPath);
+  }
+
+  const localConfig = path.join(process.cwd(), CONFIG_FILENAME);
+  if (fs.existsSync(localConfig)) {
+    return localConfig;
+  }
+
+  const legacyLocalConfig = path.join(process.cwd(), LEGACY_CONFIG_FILENAME);
+  if (fs.existsSync(legacyLocalConfig)) {
+    return legacyLocalConfig;
+  }
+
+  return getDefaultConfigPath();
+}
+
+export function loadConfig(configPath: string): Config {
+  if (fs.existsSync(configPath)) {
     try {
-      const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
+      const raw = fs.readFileSync(configPath, 'utf-8');
       const parsed = JSON.parse(raw) as Partial<Config>;
       const merged = {
         ...DEFAULT_CONFIG,
@@ -105,6 +162,7 @@ export function loadConfig(): Config {
   return { ...DEFAULT_CONFIG };
 }
 
-export function saveConfig(config: Config): void {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
+export function saveConfig(config: Config, configPath: string): void {
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
 }

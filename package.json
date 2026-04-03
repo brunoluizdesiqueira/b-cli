@@ -1,13 +1,22 @@
 {
-  "name": "bbuilder-cli",
+  "name": "@brunoluizdesiqueira/bbuilder-cli",
   "version": "1.0.0",
   "description": "CLI de build local para projetos Delphi do Bimer",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "delphi": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "chalk": "4.1.2",

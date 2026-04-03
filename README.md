@@ -7,10 +7,20 @@ CLI em Node.js/TypeScript que substitui o `build_local.bat` com interface intera
 ## Instalação
 
 ```bash
-# Na raiz do repositório (C:\git\bimer)
+# Desenvolvimento local
 npm install
 npm run build
 npm link        # disponibiliza o comando 'delphi' globalmente
+```
+
+```bash
+# Instalação via npm
+npm install -g @brunoluizdesiqueira/bbuilder-cli
+```
+
+```bash
+# Publicação
+npm publish --access public
 ```
 
 Ou use direto sem instalar globalmente:
@@ -51,15 +61,25 @@ delphi project add      # adiciona novo projeto (interativo)
 
 ### Configuração do ambiente
 ```bash
-delphi config init      # assistente para criar bimer.config.json
+delphi config init      # assistente para criar bbuilder.config.json
 delphi config show      # exibe configuração atual
 ```
 
 ---
 
-## Configuração (`bimer.config.json`)
+## Configuração (`bbuilder.config.json`)
 
-Crie na raiz do projeto com `delphi config init`, ou manualmente:
+Prioridade de resolução da configuração:
+
+1. `delphi --config <caminho>`
+2. Variável de ambiente `BBUILDER_CONFIG`
+3. `bbuilder.config.json` no diretório atual
+4. `bimer.config.json` no diretório atual, por compatibilidade
+5. Arquivo global do usuário
+
+No Windows, o arquivo global fica em `%APPDATA%\bbuilder-cli\bbuilder.config.json`.
+
+Crie com `delphi config init`, ou manualmente:
 
 ```json
 {
@@ -84,11 +104,22 @@ Crie na raiz do projeto com `delphi config init`, ou manualmente:
 }
 ```
 
-`dependencyPaths` deve ser ajustado no `bimer.config.json`, porque esses caminhos podem variar entre usuários e máquinas.
+`dependencyPaths` deve ser ajustado no `bbuilder.config.json`, porque esses caminhos podem variar entre usuários e máquinas.
 
 `projects` agora usa o formato `nome amigável: caminho real do projeto`, para a CLI exibir nomes humanizados sem perder a referência correta de compilação.
 
 Se o arquivo não existir, os valores padrão acima são usados automaticamente. Ao rodar `delphi config init`, a CLI gera um `dependencyPaths` inicial com base nos diretórios informados.
+
+Exemplos:
+
+```bash
+delphi --config C:\configs\bbuilder.config.json build
+```
+
+```bash
+set BBUILDER_CONFIG=C:\configs\bbuilder.config.json
+delphi config show
+```
 
 ---
 
@@ -158,7 +189,12 @@ E nos keybindings, nada muda — os atalhos continuam os mesmos.
 ```
 bbuilder-cli/
 ├── src/
-│   └── index.ts        ← toda a lógica da CLI
+│   ├── build/
+│   ├── cli/
+│   ├── config/
+│   ├── ui/
+│   ├── index.ts
+│   └── types.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md

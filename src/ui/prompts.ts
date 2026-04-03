@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 
-import { buildDefaultDependencyPaths, CONFIG_FILE, saveConfig } from '../config/config';
+import { buildDefaultDependencyPaths, saveConfig } from '../config/config';
 import { BuildOptions, BuildType, Config } from '../types';
 
 export async function promptBuild(config: Config, cliType?: string, cliProject?: string, cliVersion?: string): Promise<BuildOptions> {
@@ -60,7 +60,7 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
   };
 }
 
-export async function runConfigInit(config: Config): Promise<void> {
+export async function runConfigInit(config: Config, configPath: string): Promise<void> {
   console.log('');
   console.log(chalk.cyan('  Configuração Interativa do Ambiente'));
   console.log(chalk.blue('  ────────────────────────────────────'));
@@ -87,14 +87,14 @@ export async function runConfigInit(config: Config): Promise<void> {
     }),
   };
 
-  saveConfig(newConfig);
+  saveConfig(newConfig, configPath);
   console.log('');
-  console.log(chalk.green('  ✔ bimer.config.json salvo com sucesso!'));
-  console.log(chalk.gray(`    ${CONFIG_FILE}`));
+  console.log(chalk.green('  ✔ bbuilder.config.json salvo com sucesso!'));
+  console.log(chalk.gray(`    ${configPath}`));
   console.log('');
 }
 
-export async function runProjectAdd(config: Config): Promise<void> {
+export async function runProjectAdd(config: Config, configPath: string): Promise<void> {
   const { projectName, projectPath } = await inquirer.prompt([
     {
       type: 'input',
@@ -128,6 +128,6 @@ export async function runProjectAdd(config: Config): Promise<void> {
     },
   };
 
-  saveConfig(nextConfig);
+  saveConfig(nextConfig, configPath);
   console.log(chalk.green(`\n  ✔ Projeto "${projectName}" adicionado!\n`));
 }
