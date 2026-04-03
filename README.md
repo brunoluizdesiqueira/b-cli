@@ -28,14 +28,32 @@ npm publish --access public
 O repositório agora está preparado com GitHub Actions:
 
 - `CI`: roda em `push` e `pull_request`, executando `npm ci`, `tsc`, `build` e `npm pack --dry-run`
-- `Publish to npm`: roda em `push` para `main` e publica automaticamente no npm quando a versão do `package.json` ainda não existir no registry
+- `Release`: usa `changesets` para abrir uma PR de release com bump de versão e changelog; quando essa PR entra na `main`, o pacote é publicado no npm
 
 Para a publicação automática funcionar com o modelo recomendado do npm, configure um **Trusted Publisher** no npm apontando para:
 
 - repositório: `brunoluizdesiqueira/b-cli`
-- workflow: `publish.yml`
+- workflow: `release.yml`
 
-Depois disso, cada merge na `main` com uma versão nova no `package.json` poderá ser publicada automaticamente no npm.
+Fluxo recomendado:
+
+1. Criar uma changeset para cada mudança publicada:
+
+```bash
+npm run changeset
+```
+
+2. Fazer merge normalmente na `main`
+3. O workflow `Release` abre ou atualiza uma PR de release
+4. Ao mergear essa PR, o pacote é publicado automaticamente no npm
+
+Comandos locais úteis:
+
+```bash
+npm run changeset
+npm run version-packages
+npm run release
+```
 
 Ou use direto sem instalar globalmente:
 ```bash
