@@ -10,6 +10,48 @@ import { banner, fatal } from '../ui/output';
 import { promptBuild, runConfigInit, runProjectAdd } from '../ui/prompts';
 
 const packageJson = require('../../package.json') as { version: string };
+const HELP_EXAMPLES = {
+  root: [
+    'Exemplos:',
+    '  bbuilder',
+    '  bbuilder build --type DEBUG --project faturamento\\BimerFaturamento',
+    '  bbuilder fast --project Bimer',
+    '  bbuilder --config C:\\configs\\bbuilder.config.json doctor',
+  ].join('\n'),
+  build: [
+    'Exemplos:',
+    '  bbuilder build',
+    '  bbuilder build --type RELEASE --project Bimer --version 11.3.1',
+    '  bbuilder build --type FAST --project faturamento\\BimerFaturamento',
+  ].join('\n'),
+  config: [
+    'Exemplos:',
+    '  bbuilder config init',
+    '  bbuilder config show',
+    '  bbuilder config validate',
+    '  bbuilder --config C:\\configs\\bbuilder.config.json config show',
+  ].join('\n'),
+  project: [
+    'Exemplos:',
+    '  bbuilder project list',
+    '  bbuilder project add',
+  ].join('\n'),
+  doctor: [
+    'Exemplos:',
+    '  bbuilder doctor',
+    '  bbuilder --config C:\\configs\\bbuilder.config.json doctor',
+  ].join('\n'),
+};
+
+function attachHelpExamples(command: Command, examples: string): Command {
+  command.on('--help', () => {
+    console.log('');
+    console.log(examples);
+    console.log('');
+  });
+
+  return command;
+}
 
 export async function runCli(argv: string[]): Promise<void> {
   const resolvedConfigPath = resolveConfigPath(argv);
@@ -17,18 +59,24 @@ export async function runCli(argv: string[]): Promise<void> {
   const config = loadConfig(resolvedConfigPath);
   const program = new Command();
 
-  program
+  attachHelpExamples(
+    program
     .name('bbuilder')
     .description('CLI de build local para projetos Delphi do Bimer')
     .version(packageJson.version)
-    .option('-c, --config <path>', `Caminho do arquivo de configuração (ou ${CONFIG_ENV_VAR})`);
+    .option('-c, --config <path>', `Caminho do arquivo de configuração (ou ${CONFIG_ENV_VAR})`),
+    HELP_EXAMPLES.root
+  );
 
-  program
+  const buildCmd = attachHelpExamples(
+    program
     .command('build')
     .description('Compila um projeto Delphi (interativo se flags omitidas)')
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
-    .option('-v, --version <version>', 'Versão a injetar (ex: 11.2.4)')
+    .option('-v, --version <version>', 'Versão a injetar (ex: 11.2.4)'),
+    HELP_EXAMPLES.build
+  )
     .action(async (opts) => {
       const buildType = opts.type?.toUpperCase() as BuildType | undefined;
       if (buildType && !['FAST', 'DEBUG', 'RELEASE'].includes(buildType)) {
@@ -51,9 +99,12 @@ export async function runCli(argv: string[]): Promise<void> {
       });
   }
 
-  const configCmd = program
+  const configCmd = attachHelpExamples(
+    program
     .command('config')
-    .description('Gerencia a configuração do ambiente');
+    .description('Gerencia a configuração do ambiente'),
+    HELP_EXAMPLES.config
+  );
 
   configCmd
     .command('init')
@@ -81,9 +132,12 @@ export async function runCli(argv: string[]): Promise<void> {
     .description('Valida a estrutura do arquivo de configuração')
     .action(() => runConfigValidate(resolvedConfigPath));
 
-  const projectCmd = program
+  const projectCmd = attachHelpExamples(
+    program
     .command('project')
-    .description('Gerencia a lista de projetos');
+    .description('Gerencia a lista de projetos'),
+    HELP_EXAMPLES.project
+  );
 
   projectCmd
     .command('add')
@@ -103,10 +157,13 @@ export async function runCli(argv: string[]): Promise<void> {
       console.log('');
     });
 
-  program
+  attachHelpExamples(
+    program
     .command('doctor')
     .description('Diagnostica configuração, paths e binários do ambiente')
-    .action(() => runDoctor(config, resolvedConfigPath));
+    .action(() => runDoctor(config, resolvedConfigPath)),
+    HELP_EXAMPLES.doctor
+  );
 
   if (argv.length <= 2) {
     banner();
