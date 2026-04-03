@@ -1,0 +1,24 @@
+{
+  "name": "bimer-cli",
+  "version": "1.0.0",
+  "description": "CLI de build local para projetos Delphi do Bimer",
+  "bin": {
+    "bimer": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "chalk": "4.1.2",
+    "commander": "^12.0.0",
+    "execa": "5.1.1",
+    "inquirer": "^8.2.6"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.10",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}

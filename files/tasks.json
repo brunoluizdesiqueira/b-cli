@@ -1,0 +1,121 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "escolhaProjeto",
+            "type": "pickString",
+            "description": "Selecione qual projeto deseja compilar",
+            "options": [
+                "faturamento\\BimerFaturamento",
+                "Bimer",
+                "geral\\gerenteeletronico.jobs.liberadorestoque\\LiberadorEstoque",
+                "estoque\\BimerEstoque"
+            ],
+            "default": "faturamento\\BimerFaturamento"
+        },
+        {
+            "id": "versaoSistema",
+            "type": "promptString",
+            "description": "Qual a versão do executável gerado? (ex: 11.2.3)",
+            "default": "11.2.3"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "Compilar: FAST + Run",
+            "type": "shell",
+            "command": "C:\\git\\build_local.bat",
+            "args": [
+                "FAST",
+                "${input:escolhaProjeto}",
+                "${input:versaoSistema}"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "delphi",
+                "fileLocation": [
+                    "autoDetect",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*?)\\s*\\((\\d+)\\)(?:\\s+|:\\s*)(Fatal|Error|Warning|Hint|error|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
+        },
+        {
+            "label": "Compilar: DEBUG + Run",
+            "type": "shell",
+            "command": "C:\\git\\build_local.bat",
+            "args": [
+                "DEBUG",
+                "${input:escolhaProjeto}",
+                "${input:versaoSistema}"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "delphi",
+                "fileLocation": [
+                    "autoDetect",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*?)\\s*\\((\\d+)\\)(?:\\s+|:\\s*)(Fatal|Error|Warning|Hint|error|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
+        },
+        {
+            "label": "Compilar: RELEASE",
+            "type": "shell",
+            "command": "C:\\git\\build_local.bat",
+            "args": [
+                "RELEASE",
+                "${input:escolhaProjeto}",
+                "${input:versaoSistema}"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "delphi",
+                "fileLocation": [
+                    "autoDetect",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*?)\\s*\\((\\d+)\\)(?:\\s+|:\\s*)(Fatal|Error|Warning|Hint|error|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
+        }
+    ]
+}
