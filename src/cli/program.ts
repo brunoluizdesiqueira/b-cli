@@ -24,12 +24,35 @@ const HELP_EXAMPLES = {
     '  bbuilder build --type RELEASE --project Bimer --version 11.3.1',
     '  bbuilder build --type FAST --project faturamento\\BimerFaturamento',
   ].join('\n'),
+  fast: [
+    'Exemplos:',
+    '  bbuilder fast',
+    '  bbuilder fast --project Bimer',
+    '  bbuilder fast --project faturamento\\BimerFaturamento --version 11.3.1',
+  ].join('\n'),
+  debug: [
+    'Exemplos:',
+    '  bbuilder debug',
+    '  bbuilder debug --project Bimer',
+    '  bbuilder debug --project faturamento\\BimerFaturamento --version 11.3.1',
+  ].join('\n'),
+  release: [
+    'Exemplos:',
+    '  bbuilder release',
+    '  bbuilder release --project Bimer',
+    '  bbuilder release --project faturamento\\BimerFaturamento --version 11.3.1',
+  ].join('\n'),
   config: [
     'Exemplos:',
     '  bbuilder config init',
     '  bbuilder config show',
     '  bbuilder config validate',
     '  bbuilder --config C:\\configs\\bbuilder.config.json config show',
+  ].join('\n'),
+  configValidate: [
+    'Exemplos:',
+    '  bbuilder config validate',
+    '  bbuilder --config C:\\configs\\bbuilder.config.json config validate',
   ].join('\n'),
   project: [
     'Exemplos:',
@@ -88,7 +111,7 @@ export async function runCli(argv: string[]): Promise<void> {
     });
 
   for (const type of ['fast', 'debug', 'release'] as const) {
-    program
+    const shortcutCmd = program
       .command(type)
       .description(`Compila no modo ${type.toUpperCase()} (interativo para projeto/versão)`)
       .option('-p, --project <path>', 'Caminho do projeto')
@@ -97,6 +120,8 @@ export async function runCli(argv: string[]): Promise<void> {
         const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.version);
         await executeBuild(resolved);
       });
+
+    attachHelpExamples(shortcutCmd, HELP_EXAMPLES[type]);
   }
 
   const configCmd = attachHelpExamples(
@@ -127,10 +152,12 @@ export async function runCli(argv: string[]): Promise<void> {
       console.log('');
     });
 
-  configCmd
+  const configValidateCmd = configCmd
     .command('validate')
     .description('Valida a estrutura do arquivo de configuração')
     .action(() => runConfigValidate(resolvedConfigPath));
+
+  attachHelpExamples(configValidateCmd, HELP_EXAMPLES.configValidate);
 
   const projectCmd = attachHelpExamples(
     program
