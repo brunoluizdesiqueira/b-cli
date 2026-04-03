@@ -3,6 +3,7 @@ import chalk from 'chalk';
 
 import { executeBuild } from '../build/execute';
 import { CONFIG_ENV_VAR, getWritableConfigPath, loadConfig, resolveConfigPath } from '../config/config';
+import { runDoctor } from '../diagnostics/doctor';
 import { BuildType } from '../types';
 import { banner, fatal } from '../ui/output';
 import { promptBuild, runConfigInit, runProjectAdd } from '../ui/prompts';
@@ -95,6 +96,11 @@ export async function runCli(argv: string[]): Promise<void> {
       });
       console.log('');
     });
+
+  program
+    .command('doctor')
+    .description('Diagnostica configuração, paths e binários do ambiente')
+    .action(() => runDoctor(config, resolvedConfigPath));
 
   if (argv.length <= 2) {
     banner();
