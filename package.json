@@ -2,6 +2,22 @@
   "name": "@brunoluizdesiqueira/bbuilder-cli",
   "version": "1.0.1",
   "description": "CLI de build local para projetos Delphi do Bimer",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brunoluizdesiqueira/b-cli.git"
+  },
+  "homepage": "https://github.com/brunoluizdesiqueira/b-cli#readme",
+  "bugs": {
+    "url": "https://github.com/brunoluizdesiqueira/b-cli/issues"
+  },
+  "keywords": [
+    "cli",
+    "delphi",
+    "builder",
+    "bimer",
+    "typescript"
+  ],
   "files": [
     "dist",
     "README.md",

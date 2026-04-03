@@ -23,6 +23,20 @@ npm install -g @brunoluizdesiqueira/bbuilder-cli
 npm publish --access public
 ```
 
+## CI/CD
+
+O repositório agora está preparado com GitHub Actions:
+
+- `CI`: roda em `push` e `pull_request`, executando `npm ci`, `tsc`, `build` e `npm pack --dry-run`
+- `Publish to npm`: roda em `push` para `main` e publica automaticamente no npm quando a versão do `package.json` ainda não existir no registry
+
+Para a publicação automática funcionar com o modelo recomendado do npm, configure um **Trusted Publisher** no npm apontando para:
+
+- repositório: `brunoluizdesiqueira/b-cli`
+- workflow: `publish.yml`
+
+Depois disso, cada merge na `main` com uma versão nova no `package.json` poderá ser publicada automaticamente no npm.
+
 Ou use direto sem instalar globalmente:
 ```bash
 npx ts-node src/index.ts build
