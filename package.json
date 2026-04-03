@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "CLI de build local para projetos Delphi do Bimer",
   "files": [
-    "dist",
+    "dist,"
     "README.md",
     "LICENSE"
   ],

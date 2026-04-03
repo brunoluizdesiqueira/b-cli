@@ -7,6 +7,8 @@ import { BuildType } from '../types';
 import { banner, fatal } from '../ui/output';
 import { promptBuild, runConfigInit, runProjectAdd } from '../ui/prompts';
 
+const packageJson = require('../../package.json') as { version: string };
+
 export async function runCli(argv: string[]): Promise<void> {
   const resolvedConfigPath = resolveConfigPath(argv);
   const writableConfigPath = getWritableConfigPath(resolvedConfigPath);
@@ -16,7 +18,7 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .name('bbuilder')
     .description('CLI de build local para projetos Delphi do Bimer')
-    .version('1.0.0')
+    .version(packageJson.version)
     .option('-c, --config <path>', `Caminho do arquivo de configuração (ou ${CONFIG_ENV_VAR})`);
 
   program
