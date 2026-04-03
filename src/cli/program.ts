@@ -3,6 +3,7 @@ import chalk from 'chalk';
 
 import { executeBuild } from '../build/execute';
 import { CONFIG_ENV_VAR, getWritableConfigPath, loadConfig, resolveConfigPath } from '../config/config';
+import { runConfigValidate } from '../config/validate';
 import { runDoctor } from '../diagnostics/doctor';
 import { BuildType } from '../types';
 import { banner, fatal } from '../ui/output';
@@ -74,6 +75,11 @@ export async function runCli(argv: string[]): Promise<void> {
         .join('\n'));
       console.log('');
     });
+
+  configCmd
+    .command('validate')
+    .description('Valida a estrutura do arquivo de configuração')
+    .action(() => runConfigValidate(resolvedConfigPath));
 
   const projectCmd = program
     .command('project')

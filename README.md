@@ -63,6 +63,7 @@ bbuilder project add    # adiciona novo projeto (interativo)
 ```bash
 bbuilder config init    # assistente para criar bbuilder.config.json
 bbuilder config show    # exibe configuração atual
+bbuilder config validate # valida a estrutura do arquivo de configuração
 bbuilder doctor         # diagnostica ambiente, config e paths
 ```
 
