@@ -110,6 +110,46 @@ Crie com `bbuilder config init`, ou manualmente:
 
 Se o arquivo não existir, os valores padrão acima são usados automaticamente. Ao rodar `bbuilder config init`, a CLI gera um `dependencyPaths` inicial com base nos diretórios informados.
 
+### Como usar configs locais
+
+O pacote é instalado normalmente, e a configuração é informada na execução, não na instalação.
+
+Instalação global:
+
+```bash
+npm install -g @brunoluizdesiqueira/bbuilder-cli
+```
+
+Usando um arquivo de config local explícito:
+
+```bash
+bbuilder --config C:\configs\bbuilder.config.json build
+```
+
+Usando variável de ambiente no Windows CMD:
+
+```bat
+set BBUILDER_CONFIG=C:\configs\bbuilder.config.json
+bbuilder build
+```
+
+Usando variável de ambiente no PowerShell:
+
+```powershell
+$env:BBUILDER_CONFIG="C:\configs\bbuilder.config.json"
+bbuilder build
+```
+
+Usando config local no diretório atual:
+
+Se existir um `bbuilder.config.json` na pasta onde o comando é executado, a CLI usa esse arquivo automaticamente.
+
+Para verificar qual arquivo está sendo usado:
+
+```bash
+bbuilder config show
+```
+
 Exemplos:
 
 ```bash
