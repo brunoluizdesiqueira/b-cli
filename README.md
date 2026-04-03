@@ -10,7 +10,7 @@ CLI em Node.js/TypeScript que substitui o `build_local.bat` com interface intera
 # Desenvolvimento local
 npm install
 npm run build
-npm link        # disponibiliza o comando 'delphi' globalmente
+npm link        # disponibiliza o comando 'bbuilder' globalmente
 ```
 
 ```bash
@@ -34,35 +34,35 @@ npx ts-node src/index.ts build
 
 ### Modo interativo (sem argumentos)
 ```bash
-delphi
+bbuilder
 ```
 Exibe menus para escolher: modo de build → projeto → versão.
 
 ### Comando `build` com flags opcionais
 ```bash
-delphi build                                         # interativo completo
-delphi build --type DEBUG                            # escolhe projeto e versão interativamente
-delphi build --type FAST --project faturamento\BimerFaturamento
-delphi build --type RELEASE --project Bimer --version 11.3.1
+bbuilder build                                       # interativo completo
+bbuilder build --type DEBUG                          # escolhe projeto e versão interativamente
+bbuilder build --type FAST --project faturamento\BimerFaturamento
+bbuilder build --type RELEASE --project Bimer --version 11.3.1
 ```
 
 ### Atalhos diretos por modo
 ```bash
-delphi fast                                          # interativo para projeto/versão
-delphi debug --project Bimer
-delphi release --project Bimer --version 11.3.1
+bbuilder fast                                        # interativo para projeto/versão
+bbuilder debug --project Bimer
+bbuilder release --project Bimer --version 11.3.1
 ```
 
 ### Gerenciamento de projetos
 ```bash
-delphi project list     # lista projetos configurados
-delphi project add      # adiciona novo projeto (interativo)
+bbuilder project list   # lista projetos configurados
+bbuilder project add    # adiciona novo projeto (interativo)
 ```
 
 ### Configuração do ambiente
 ```bash
-delphi config init      # assistente para criar bbuilder.config.json
-delphi config show      # exibe configuração atual
+bbuilder config init    # assistente para criar bbuilder.config.json
+bbuilder config show    # exibe configuração atual
 ```
 
 ---
@@ -71,7 +71,7 @@ delphi config show      # exibe configuração atual
 
 Prioridade de resolução da configuração:
 
-1. `delphi --config <caminho>`
+1. `bbuilder --config <caminho>`
 2. Variável de ambiente `BBUILDER_CONFIG`
 3. `bbuilder.config.json` no diretório atual
 4. `bimer.config.json` no diretório atual, por compatibilidade
@@ -79,7 +79,7 @@ Prioridade de resolução da configuração:
 
 No Windows, o arquivo global fica em `%APPDATA%\bbuilder-cli\bbuilder.config.json`.
 
-Crie com `delphi config init`, ou manualmente:
+Crie com `bbuilder config init`, ou manualmente:
 
 ```json
 {
@@ -108,17 +108,17 @@ Crie com `delphi config init`, ou manualmente:
 
 `projects` agora usa o formato `nome amigável: caminho real do projeto`, para a CLI exibir nomes humanizados sem perder a referência correta de compilação.
 
-Se o arquivo não existir, os valores padrão acima são usados automaticamente. Ao rodar `delphi config init`, a CLI gera um `dependencyPaths` inicial com base nos diretórios informados.
+Se o arquivo não existir, os valores padrão acima são usados automaticamente. Ao rodar `bbuilder config init`, a CLI gera um `dependencyPaths` inicial com base nos diretórios informados.
 
 Exemplos:
 
 ```bash
-delphi --config C:\configs\bbuilder.config.json build
+bbuilder --config C:\configs\bbuilder.config.json build
 ```
 
 ```bash
 set BBUILDER_CONFIG=C:\configs\bbuilder.config.json
-delphi config show
+bbuilder config show
 ```
 
 ---
@@ -134,7 +134,7 @@ Substitua o `tasks.json` atual por este (sem mais menus do VSCode, a CLI cuida d
     {
       "label": "Bimer: FAST + Run",
       "type": "shell",
-      "command": "delphi fast",
+      "command": "bbuilder fast",
       "group": "build",
       "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
       "problemMatcher": {
@@ -149,7 +149,7 @@ Substitua o `tasks.json` atual por este (sem mais menus do VSCode, a CLI cuida d
     {
       "label": "Bimer: DEBUG + Run",
       "type": "shell",
-      "command": "delphi debug",
+      "command": "bbuilder debug",
       "group": "build",
       "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
       "problemMatcher": {
@@ -164,7 +164,7 @@ Substitua o `tasks.json` atual por este (sem mais menus do VSCode, a CLI cuida d
     {
       "label": "Bimer: RELEASE",
       "type": "shell",
-      "command": "delphi release",
+      "command": "bbuilder release",
       "group": "build",
       "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
       "problemMatcher": {

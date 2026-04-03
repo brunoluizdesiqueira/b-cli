@@ -14,7 +14,7 @@ export async function runCli(argv: string[]): Promise<void> {
   const program = new Command();
 
   program
-    .name('delphi')
+    .name('bbuilder')
     .description('CLI de build local para projetos Delphi do Bimer')
     .version('1.0.0')
     .option('-c, --config <path>', `Caminho do arquivo de configuração (ou ${CONFIG_ENV_VAR})`);
