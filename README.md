@@ -23,29 +23,74 @@ npm install -g @brunoluizdesiqueira/bbuilder-cli
 npm publish --access public
 ```
 
-## CI/CD
+## Publicação
 
-O repositório agora está preparado com GitHub Actions:
+### Publicação manual inicial
 
-- `CI`: roda em `push` e `pull_request`, executando `npm ci`, `tsc`, `build` e `npm pack --dry-run`
-- `Release`: usa `changesets` para abrir uma PR de release com bump de versão e changelog; quando essa PR entra na `main`, o pacote é publicado no npm
+Use esse fluxo para a primeira publicação ou para publicar manualmente uma versão:
 
-Para a publicação automática funcionar com o modelo recomendado do npm, configure um **Trusted Publisher** no npm apontando para:
+1. Faça login no npm:
 
-- repositório: `brunoluizdesiqueira/b-cli`
-- workflow: `release.yml`
+```bash
+npm login
+```
 
-Fluxo recomendado:
+2. Valide o pacote localmente:
 
-1. Criar uma changeset para cada mudança publicada:
+```bash
+npm run build
+npm pack --dry-run
+```
+
+3. Publique:
+
+```bash
+npm publish --access public
+```
+
+Se a versão atual do `package.json` já tiver sido publicada, gere uma nova versão antes:
+
+```bash
+npm version patch --no-git-tag-version
+npm publish --access public
+```
+
+### Configurar publicação automática
+
+Depois da primeira publicação manual, configure o npm para confiar no workflow do GitHub Actions.
+
+No npm:
+
+1. abra a página do pacote `@brunoluizdesiqueira/bbuilder-cli`
+2. vá em `Settings`
+3. abra `Trusted publishing`
+4. adicione um publisher do tipo `GitHub Actions`
+5. configure:
+   - repositório: `brunoluizdesiqueira/b-cli`
+   - workflow: `release.yml`
+
+Na opção **Publishing access**, use:
+
+- `Require two-factor authentication or a granular access token with bypass 2fa enabled`
+
+Evite para esse fluxo:
+
+- `Require two-factor authentication and disallow tokens`
+
+### Publicação automática com Changesets
+
+Depois do Trusted Publisher configurado, o fluxo recomendado fica assim:
+
+1. criar uma changeset para cada mudança publicada:
 
 ```bash
 npm run changeset
 ```
 
-2. Fazer merge normalmente na `main`
-3. O workflow `Release` abre ou atualiza uma PR de release
-4. Ao mergear essa PR, o pacote é publicado automaticamente no npm
+2. fazer commit da changeset junto com o código
+3. abrir PR e fazer merge na `main`
+4. o workflow `Release` abre ou atualiza uma PR de release
+5. ao mergear a PR de release, o npm é publicado automaticamente
 
 Comandos locais úteis:
 
@@ -54,6 +99,13 @@ npm run changeset
 npm run version-packages
 npm run release
 ```
+
+## CI/CD
+
+O repositório agora está preparado com GitHub Actions:
+
+- `CI`: roda em `push` e `pull_request`, executando `npm ci`, `tsc`, `build` e `npm pack --dry-run`
+- `Release`: usa `changesets` para abrir uma PR de release com bump de versão e changelog; quando essa PR entra na `main`, o pacote é publicado no npm
 
 Ou use direto sem instalar globalmente:
 ```bash
