@@ -314,15 +314,41 @@ E nos keybindings, nada muda — os atalhos continuam os mesmos.
 
 ```
 bbuilder-cli/
+├── .changeset/
+│   ├── config.json
+│   └── *.md
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── release.yml
 ├── src/
 │   ├── build/
+│   │   ├── compiler.ts
+│   │   ├── execute.ts
+│   │   ├── project.ts
+│   │   └── resources.ts
 │   ├── cli/
+│   │   └── program.ts
 │   ├── config/
+│   │   ├── config.ts
+│   │   └── validate.ts
+│   ├── diagnostics/
+│   │   └── doctor.ts
 │   ├── ui/
+│   │   ├── output.ts
+│   │   └── prompts.ts
 │   ├── index.ts
 │   └── types.ts
+├── files/
+│   ├── build_local.bat
+│   ├── tasks.json
+│   └── ...
+├── bbuilder.config.json
 ├── package.json
+├── package-lock.json
 ├── tsconfig.json
+├── .gitignore
+├── LICENSE
 └── README.md
 ```
 
