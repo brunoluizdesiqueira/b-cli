@@ -12,7 +12,7 @@ export async function runCli(argv: string[]): Promise<void> {
   const program = new Command();
 
   program
-    .name('bimer')
+    .name('delphi')
     .description('CLI de build local para projetos Delphi do Bimer')
     .version('1.0.0');
 

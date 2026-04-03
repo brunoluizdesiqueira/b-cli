@@ -1,4 +1,4 @@
-# bimer-cli
+# bbuilder-cli
 
 CLI em Node.js/TypeScript que substitui o `build_local.bat` com interface interativa e suporte a flags diretas.
 
@@ -10,7 +10,7 @@ CLI em Node.js/TypeScript que substitui o `build_local.bat` com interface intera
 # Na raiz do repositório (C:\git\bimer)
 npm install
 npm run build
-npm link        # disponibiliza o comando 'bimer' globalmente
+npm link        # disponibiliza o comando 'delphi' globalmente
 ```
 
 Ou use direto sem instalar globalmente:
@@ -24,42 +24,42 @@ npx ts-node src/index.ts build
 
 ### Modo interativo (sem argumentos)
 ```bash
-bimer
+delphi
 ```
 Exibe menus para escolher: modo de build → projeto → versão.
 
 ### Comando `build` com flags opcionais
 ```bash
-bimer build                                          # interativo completo
-bimer build --type DEBUG                             # escolhe projeto e versão interativamente
-bimer build --type FAST --project faturamento\BimerFaturamento
-bimer build --type RELEASE --project Bimer --version 11.3.1
+delphi build                                         # interativo completo
+delphi build --type DEBUG                            # escolhe projeto e versão interativamente
+delphi build --type FAST --project faturamento\BimerFaturamento
+delphi build --type RELEASE --project Bimer --version 11.3.1
 ```
 
 ### Atalhos diretos por modo
 ```bash
-bimer fast                                           # interativo para projeto/versão
-bimer debug --project Bimer
-bimer release --project Bimer --version 11.3.1
+delphi fast                                          # interativo para projeto/versão
+delphi debug --project Bimer
+delphi release --project Bimer --version 11.3.1
 ```
 
 ### Gerenciamento de projetos
 ```bash
-bimer project list      # lista projetos configurados
-bimer project add       # adiciona novo projeto (interativo)
+delphi project list     # lista projetos configurados
+delphi project add      # adiciona novo projeto (interativo)
 ```
 
 ### Configuração do ambiente
 ```bash
-bimer config init       # assistente para criar bimer.config.json
-bimer config show       # exibe configuração atual
+delphi config init      # assistente para criar bimer.config.json
+delphi config show      # exibe configuração atual
 ```
 
 ---
 
 ## Configuração (`bimer.config.json`)
 
-Crie na raiz do projeto com `bimer config init`, ou manualmente:
+Crie na raiz do projeto com `delphi config init`, ou manualmente:
 
 ```json
 {
@@ -88,7 +88,7 @@ Crie na raiz do projeto com `bimer config init`, ou manualmente:
 
 `projects` agora usa o formato `nome amigável: caminho real do projeto`, para a CLI exibir nomes humanizados sem perder a referência correta de compilação.
 
-Se o arquivo não existir, os valores padrão acima são usados automaticamente. Ao rodar `bimer config init`, a CLI gera um `dependencyPaths` inicial com base nos diretórios informados.
+Se o arquivo não existir, os valores padrão acima são usados automaticamente. Ao rodar `delphi config init`, a CLI gera um `dependencyPaths` inicial com base nos diretórios informados.
 
 ---
 
@@ -103,7 +103,7 @@ Substitua o `tasks.json` atual por este (sem mais menus do VSCode, a CLI cuida d
     {
       "label": "Bimer: FAST + Run",
       "type": "shell",
-      "command": "bimer fast",
+      "command": "delphi fast",
       "group": "build",
       "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
       "problemMatcher": {
@@ -118,7 +118,7 @@ Substitua o `tasks.json` atual por este (sem mais menus do VSCode, a CLI cuida d
     {
       "label": "Bimer: DEBUG + Run",
       "type": "shell",
-      "command": "bimer debug",
+      "command": "delphi debug",
       "group": "build",
       "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
       "problemMatcher": {
@@ -133,7 +133,7 @@ Substitua o `tasks.json` atual por este (sem mais menus do VSCode, a CLI cuida d
     {
       "label": "Bimer: RELEASE",
       "type": "shell",
-      "command": "bimer release",
+      "command": "delphi release",
       "group": "build",
       "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
       "problemMatcher": {
@@ -156,7 +156,7 @@ E nos keybindings, nada muda — os atalhos continuam os mesmos.
 ## Estrutura do Projeto
 
 ```
-bimer-cli/
+bbuilder-cli/
 ├── src/
 │   └── index.ts        ← toda a lógica da CLI
 ├── package.json

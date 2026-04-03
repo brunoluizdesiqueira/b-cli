@@ -1,9 +1,9 @@
 {
-  "name": "bimer-cli",
+  "name": "bbuilder-cli",
   "version": "1.0.0",
   "description": "CLI de build local para projetos Delphi do Bimer",
   "bin": {
-    "bimer": "./dist/index.js"
+    "delphi": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
