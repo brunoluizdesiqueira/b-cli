@@ -7,7 +7,7 @@ import { runConfigValidate } from '../config/validate';
 import { runDoctor } from '../diagnostics/doctor';
 import { BuildType } from '../types';
 import { banner, fatal } from '../ui/output';
-import { promptBuild, runConfigInit, runProjectAdd } from '../ui/prompts';
+import { promptBuild, runConfigInit, runProjectAdd, runProjectRemove } from '../ui/prompts';
 
 const packageJson = require('../../package.json') as { version: string };
 const HELP_EXAMPLES = {
@@ -58,6 +58,13 @@ const HELP_EXAMPLES = {
     'Exemplos:',
     '  bbuilder project list',
     '  bbuilder project add',
+    '  bbuilder project remove',
+    '  bbuilder project remove --name Bimer',
+  ].join('\n'),
+  projectRemove: [
+    'Exemplos:',
+    '  bbuilder project remove',
+    '  bbuilder project remove --name Bimer',
   ].join('\n'),
   doctor: [
     'Exemplos:',
@@ -183,6 +190,14 @@ export async function runCli(argv: string[]): Promise<void> {
       });
       console.log('');
     });
+
+  const projectRemoveCmd = projectCmd
+    .command('remove')
+    .description('Remove um projeto da lista')
+    .option('-n, --name <projectName>', 'Nome do projeto cadastrado')
+    .action((opts) => runProjectRemove(config, writableConfigPath, opts.name));
+
+  attachHelpExamples(projectRemoveCmd, HELP_EXAMPLES.projectRemove);
 
   attachHelpExamples(
     program

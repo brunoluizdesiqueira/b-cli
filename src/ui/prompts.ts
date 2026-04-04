@@ -131,3 +131,46 @@ export async function runProjectAdd(config: Config, configPath: string): Promise
   saveConfig(nextConfig, configPath);
   console.log(chalk.green(`\n  ✔ Projeto "${projectName}" adicionado!\n`));
 }
+
+export async function runProjectRemove(config: Config, configPath: string, cliProjectName?: string): Promise<void> {
+  const projectEntries = Object.entries(config.projects);
+
+  if (projectEntries.length === 0) {
+    console.log(chalk.yellow('\n  Não há projetos cadastrados para remover.\n'));
+    return;
+  }
+
+  let projectName = cliProjectName;
+
+  if (!projectName) {
+    const answers = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'projectName',
+        message: 'Qual projeto deseja remover?',
+        choices: projectEntries.map(([name, projectPath]) => ({
+          name: `${name} (${projectPath})`,
+          value: name,
+        })),
+      },
+    ] as any);
+
+    projectName = answers.projectName;
+  }
+
+  if (!projectName || !config.projects[projectName]) {
+    console.log(chalk.yellow(`\n  Projeto "${projectName || ''}" não encontrado.\n`));
+    return;
+  }
+
+  const nextProjects = { ...config.projects };
+  delete nextProjects[projectName];
+
+  const nextConfig: Config = {
+    ...config,
+    projects: nextProjects,
+  };
+
+  saveConfig(nextConfig, configPath);
+  console.log(chalk.green(`\n  ✔ Projeto "${projectName}" removido!\n`));
+}
