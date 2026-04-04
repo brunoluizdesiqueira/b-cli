@@ -50,7 +50,6 @@ async function runWindowsCommand(executable: string, args: string[], cwd?: strin
   await execa('cmd.exe', ['/d', '/s', '/c', command], {
     cwd,
     stdio: 'inherit',
-    windowsVerbatimArguments: true,
   });
 }
 
