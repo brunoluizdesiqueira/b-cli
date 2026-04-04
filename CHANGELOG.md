@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.3
+
+### Patch Changes
+
+- 5e28604: fix path windows environment
+
 ## 1.0.2
 
 ### Patch Changes
