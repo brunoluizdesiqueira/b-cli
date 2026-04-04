@@ -39,6 +39,21 @@ function buildDependencies(opts: BuildOptions): string {
   return opts.dependencyPaths.join(';');
 }
 
+function quoteForCmd(value: string): string {
+  if (!value) return '""';
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+async function runWindowsCommand(executable: string, args: string[], cwd?: string): Promise<void> {
+  const command = [quoteForCmd(executable), ...args.map(quoteForCmd)].join(' ');
+
+  await execa('cmd.exe', ['/d', '/s', '/c', command], {
+    cwd,
+    stdio: 'inherit',
+    windowsVerbatimArguments: true,
+  });
+}
+
 export async function runCgrc(opts: BuildOptions, projectName: string): Promise<string> {
   const tempDir = path.join(os.tmpdir(), `BimerBuild_${projectName}`);
   const vrcFile = path.join(tempDir, `${projectName}.vrc`);
@@ -47,11 +62,7 @@ export async function runCgrc(opts: BuildOptions, projectName: string): Promise<
   step('Compilando recursos e embutindo ícone...');
 
   try {
-    await execa(
-      path.win32.join(opts.delphiDir, 'bin', 'cgrc.exe'),
-      [vrcFile, `-fo${resFile}`],
-      { stdio: 'inherit' }
-    );
+    await runWindowsCommand(path.win32.join(opts.delphiDir, 'bin', 'cgrc.exe'), [vrcFile, `-fo${resFile}`]);
   } catch {
     fatal('Falha do compilador CGRC ao gerar o arquivo de recursos .res.');
   }
@@ -97,10 +108,7 @@ export async function runDcc64(opts: BuildOptions, projectName: string, workspac
   ];
 
   try {
-    await execa(dcc64, args, {
-      cwd: workspaceDir,
-      stdio: 'inherit',
-    });
+    await runWindowsCommand(dcc64, args, workspaceDir);
   } catch {
     fatal('Falha na compilação do Delphi. Verifique os logs de erro acima.');
   }
