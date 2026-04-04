@@ -1,4 +1,3 @@
-import { spawn } from 'child_process';
 import execa from 'execa';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -6,6 +5,8 @@ import * as path from 'path';
 
 import { BuildOptions, BuildType } from '../types';
 import { fatal, step } from '../ui/output';
+
+const delphiEnvCache = new Map<string, NodeJS.ProcessEnv>();
 
 export function buildCompilerFlags(buildType: BuildType): { flags: string[]; defines: string; runAfter: boolean } {
   const baseDefines = 'DEBUG;ALT_CEF133_0;EUREKALOG';
@@ -40,41 +41,73 @@ function buildDependencies(opts: BuildOptions): string {
   return opts.dependencyPaths.join(';');
 }
 
-function quoteForCmd(value: string): string {
-  if (!value) return '""';
-  return `"${value.replace(/"/g, '\\"')}"`;
+function parseWindowsEnv(output: string): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
+
+  for (const line of output.split(/\r?\n/)) {
+    const separatorIndex = line.indexOf('=');
+    if (separatorIndex <= 0) continue;
+
+    const key = line.slice(0, separatorIndex).trim();
+    const value = line.slice(separatorIndex + 1);
+    if (!key) continue;
+
+    env[key] = value;
+  }
+
+  return env;
 }
 
-async function runWindowsCommand(executable: string, args: string[], cwd?: string): Promise<void> {
-  const command = [quoteForCmd(executable), ...args.map(quoteForCmd)].join(' ');
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn(command, {
-      cwd,
-      stdio: 'inherit',
-      shell: true,
-    });
+async function getDelphiEnvironment(delphiDir: string): Promise<NodeJS.ProcessEnv> {
+  const cached = delphiEnvCache.get(delphiDir);
+  if (cached) {
+    return cached;
+  }
 
-    child.on('error', reject);
-    child.on('exit', code => {
-      if (code === 0) {
-        resolve();
-        return;
+  const rsvarsPath = path.win32.join(delphiDir, 'bin', 'rsvars.bat');
+
+  if (!fs.existsSync(rsvarsPath)) {
+    fatal(`Arquivo não encontrado: ${rsvarsPath}`);
+  }
+
+  try {
+    const result = await execa(
+      'cmd.exe',
+      ['/d', '/s', '/c', `call "${rsvarsPath}" >nul && set`],
+      {
+        env: process.env,
       }
+    );
 
-      reject(new Error(`Command exited with code ${code ?? 'unknown'}`));
-    });
-  });
+    const resolved = {
+      ...process.env,
+      ...parseWindowsEnv(result.stdout),
+    };
+
+    delphiEnvCache.set(delphiDir, resolved);
+    return resolved;
+  } catch {
+    fatal('Falha ao carregar o ambiente do Delphi via rsvars.bat.');
+  }
 }
 
 export async function runCgrc(opts: BuildOptions, projectName: string): Promise<string> {
   const tempDir = path.join(os.tmpdir(), `BimerBuild_${projectName}`);
   const vrcFile = path.join(tempDir, `${projectName}.vrc`);
   const resFile = path.join(tempDir, `${projectName}.res`);
+  const delphiEnv = await getDelphiEnvironment(opts.delphiDir);
 
   step('Compilando recursos e embutindo ícone...');
 
   try {
-    await runWindowsCommand(path.win32.join(opts.delphiDir, 'bin', 'cgrc.exe'), [vrcFile, `-fo${resFile}`]);
+    await execa(
+      path.win32.join(opts.delphiDir, 'bin', 'cgrc.exe'),
+      [vrcFile, `-fo${resFile}`],
+      {
+        env: delphiEnv,
+        stdio: 'inherit',
+      }
+    );
   } catch {
     fatal('Falha do compilador CGRC ao gerar o arquivo de recursos .res.');
   }
@@ -87,6 +120,7 @@ export async function runDcc64(opts: BuildOptions, projectName: string, workspac
   const deps = buildDependencies(opts);
   const exeOut = path.win32.join('C:\\Temp', opts.envVersion, 'EXE');
   const dcuOut = path.win32.join('C:\\Temp', opts.envVersion, 'DCU');
+  const delphiEnv = await getDelphiEnvironment(opts.delphiDir);
 
   if (!fs.existsSync(exeOut)) fs.mkdirSync(exeOut, { recursive: true });
   if (!fs.existsSync(dcuOut)) fs.mkdirSync(dcuOut, { recursive: true });
@@ -120,7 +154,11 @@ export async function runDcc64(opts: BuildOptions, projectName: string, workspac
   ];
 
   try {
-    await runWindowsCommand(dcc64, args, workspaceDir);
+    await execa(dcc64, args, {
+      cwd: workspaceDir,
+      env: delphiEnv,
+      stdio: 'inherit',
+    });
   } catch {
     fatal('Falha na compilação do Delphi. Verifique os logs de erro acima.');
   }
