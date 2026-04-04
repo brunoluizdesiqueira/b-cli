@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.4
+
+### Patch Changes
+
+- a417ae1: change compiler at cdm
+
 ## 1.0.3
 
 ### Patch Changes
