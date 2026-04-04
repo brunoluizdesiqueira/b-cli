@@ -1,6 +1,6 @@
 {
   "name": "@brunoluizdesiqueira/bbuilder-cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI de build local para projetos Delphi do Bimer",
   "license": "ISC",
   "repository": {
