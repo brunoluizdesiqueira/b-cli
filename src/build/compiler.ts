@@ -71,9 +71,10 @@ async function getDelphiEnvironment(delphiDir: string): Promise<NodeJS.ProcessEn
   }
 
   try {
+    const command = `call "${rsvarsPath}" >nul && set`;
     const result = await execa(
       'cmd.exe',
-      ['/d', '/s', '/c', `call "${rsvarsPath}" >nul && set`],
+      ['/d', '/s', '/c', `"${command}"`],
       {
         env: process.env,
       }
@@ -86,8 +87,9 @@ async function getDelphiEnvironment(delphiDir: string): Promise<NodeJS.ProcessEn
 
     delphiEnvCache.set(delphiDir, resolved);
     return resolved;
-  } catch {
-    fatal('Falha ao carregar o ambiente do Delphi via rsvars.bat.');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    fatal(`Falha ao carregar o ambiente do Delphi via rsvars.bat (${rsvarsPath}). Detalhe: ${message}`);
   }
 }
 
