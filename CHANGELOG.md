@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.16
+
+### Patch Changes
+
+- ca61c56: fix: rvars
+
 ## 1.0.15
 
 ### Patch Changes
