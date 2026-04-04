@@ -117,9 +117,11 @@ export async function withProgress<T>(
   stage: number,
   total: number,
   label: string,
-  task: () => Promise<T> | T
+  task: () => Promise<T> | T,
+  options?: { streamingOutput?: boolean }
 ): Promise<T> {
   const startTime = Date.now();
+  const streamingOutput = options?.streamingOutput ?? false;
 
   if (!process.stdout.isTTY) {
     step(`[${stage}/${total}] ${label}`);
@@ -128,23 +130,53 @@ export async function withProgress<T>(
     return result;
   }
 
-  let frameIndex = 0;
-  drawProgressLine(renderProgressLine(stage, total, label, startTime, frameIndex));
+  if (streamingOutput) {
+    step(`[${stage}/${total}] ${label}`);
+    try {
+      const result = await task();
+      console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+      return result;
+    } catch (error) {
+      console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+      throw error;
+    }
+  }
 
-  const timer = setInterval(() => {
-    frameIndex += 1;
+  let frameIndex = 0;
+  let rendered = false;
+  let timer: NodeJS.Timeout | undefined;
+
+  const render = (): void => {
+    clearProgressLine();
     drawProgressLine(renderProgressLine(stage, total, label, startTime, frameIndex));
-  }, 120);
+    rendered = true;
+  };
+
+  const startTimer = (): void => {
+    if (timer) return;
+
+    timer = setInterval(() => {
+      frameIndex += 1;
+      render();
+    }, 120);
+  };
+
+  const initialDelay = setTimeout(() => {
+    render();
+    startTimer();
+  }, 180);
 
   try {
     const result = await task();
-    clearInterval(timer);
-    clearProgressLine();
+    clearTimeout(initialDelay);
+    if (timer) clearInterval(timer);
+    if (rendered) clearProgressLine();
     console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
     return result;
   } catch (error) {
-    clearInterval(timer);
-    clearProgressLine();
+    clearTimeout(initialDelay);
+    if (timer) clearInterval(timer);
+    if (rendered) clearProgressLine();
     console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
     throw error;
   }

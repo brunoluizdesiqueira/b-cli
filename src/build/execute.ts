@@ -28,7 +28,13 @@ export async function executeBuild(opts: BuildOptions): Promise<void> {
     fs.copyFileSync(resFile, path.win32.join(workspaceDir, `${projectName}.res`));
   });
 
-  await withProgress(4, totalStages, `Compilando projeto Delphi (${opts.type})`, () => runDcc64(opts, projectName, workspaceDir));
+  await withProgress(
+    4,
+    totalStages,
+    `Compilando projeto Delphi (${opts.type})`,
+    () => runDcc64(opts, projectName, workspaceDir),
+    { streamingOutput: true }
+  );
 
   printSuccess(opts.type);
 
