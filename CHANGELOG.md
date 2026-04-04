@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.8
+
+### Patch Changes
+
+- 5fe414b: adjust support rsvars
+
 ## 1.0.7
 
 ### Patch Changes
