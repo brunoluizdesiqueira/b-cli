@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.15
+
+### Patch Changes
+
+- afa0017: fix: progress bar and warn
+
 ## 1.0.14
 
 ### Patch Changes
