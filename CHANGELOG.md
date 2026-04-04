@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.5
+
+### Patch Changes
+
+- 8096ed2: resolve verbatim args to cmd
+
 ## 1.0.4
 
 ### Patch Changes
