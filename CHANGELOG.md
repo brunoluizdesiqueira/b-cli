@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.13
+
+### Patch Changes
+
+- 526c7b9: fix: progress bar
+
 ## 1.0.12
 
 ### Patch Changes
