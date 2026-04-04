@@ -141,6 +141,7 @@ bbuilder release --project Bimer --version 11.3.1
 ```bash
 bbuilder project list   # lista projetos configurados
 bbuilder project add    # adiciona novo projeto (interativo)
+bbuilder project remove # remove projeto (interativo ou por --name)
 ```
 
 ### Configuração do ambiente
