@@ -35,10 +35,12 @@ export function runDoctor(config: Config, resolvedConfigPath: string): void {
   const checks: CheckResult[] = [];
   const cgrcPath = path.win32.join(config.delphiDir, 'bin', 'cgrc.exe');
   const dcc64Path = path.win32.join(config.delphiDir, 'bin', 'dcc64.exe');
+  const delphiRuntimePath = path.win32.join(config.delphiDir, 'lib', 'Win64', 'release');
 
   checks.push(checkFile('Arquivo de configuração em uso', resolvedConfigPath));
   checks.push(checkPath('repoBase', config.repoBase));
   checks.push(checkPath('delphiDir', config.delphiDir));
+  checks.push(checkPath('Delphi runtime Win64', delphiRuntimePath));
   checks.push(checkPath('libRoot', config.libRoot));
   checks.push(checkPath('libErp', config.libErp));
   checks.push(checkPath('libAlterdata', config.libAlterdata));
@@ -56,6 +58,11 @@ export function runDoctor(config: Config, resolvedConfigPath: string): void {
     label: 'dependencyPaths configurados',
     ok: Array.isArray(config.dependencyPaths) && config.dependencyPaths.length > 0,
     detail: `${config.dependencyPaths.length} path(s)`,
+  });
+  checks.push({
+    label: 'Delphi runtime presente em dependencyPaths',
+    ok: config.dependencyPaths.includes(delphiRuntimePath),
+    detail: delphiRuntimePath,
   });
 
   console.log('');

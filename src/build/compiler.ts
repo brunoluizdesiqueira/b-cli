@@ -33,7 +33,10 @@ export function buildCompilerFlags(buildType: BuildType): { flags: string[]; def
 }
 
 function buildDependencies(opts: BuildOptions): string {
-  return opts.dependencyPaths.map(p => `"${p}"`).join(';');
+  // execa passes each compiler switch as a single argv entry, so we should
+  // not embed quotes inside the semicolon-separated list. Doing that can make
+  // dcc64 fail to resolve paths such as the Delphi runtime library.
+  return opts.dependencyPaths.join(';');
 }
 
 export async function runCgrc(opts: BuildOptions, projectName: string): Promise<string> {
