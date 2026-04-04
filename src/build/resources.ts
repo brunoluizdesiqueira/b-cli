@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { BuildOptions } from '../types';
-import { fatal, step } from '../ui/output';
+import { fatal } from '../ui/output';
 
 function parseVersionParts(version: string): [number, number, number, number] {
   const normalized = version.trim().replace(/\.+$/, '');
@@ -132,12 +132,6 @@ export function prepareProjectResources(opts: BuildOptions, projectName: string,
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
   if (!fs.existsSync(dproj)) {
     fatal(`Arquivo de projeto não encontrado: ${dproj}`);
-  }
-
-  if (opts.version) {
-    step(`Injetando versão ${opts.version} no projeto...`);
-  } else {
-    step('Nenhuma versão informada. Lendo atual do projeto...');
   }
 
   try {

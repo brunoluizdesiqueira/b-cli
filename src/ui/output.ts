@@ -2,6 +2,10 @@ import chalk from 'chalk';
 
 import { BuildOptions, BuildType } from '../types';
 
+const SPINNER_FRAMES = ['|', '/', '-', '\\'];
+const BAR_WIDTH = 18;
+const BAR_SEGMENT = 6;
+
 export function banner(): void {
   console.log('');
   console.log(chalk.blue('  ══════════════════════════════════════════════════════════════'));
@@ -53,6 +57,74 @@ export function printSuccess(buildType: BuildType): void {
 
 export function step(msg: string): void {
   console.log(chalk.cyan('  [*]') + ' ' + chalk.white(msg));
+}
+
+function formatElapsed(startTime: number): string {
+  const totalSeconds = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+  const minutes = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+
+  return `${minutes}:${seconds}`;
+}
+
+function buildIndeterminateBar(frameIndex: number): string {
+  const chars = new Array(BAR_WIDTH).fill('░');
+  const start = frameIndex % (BAR_WIDTH + BAR_SEGMENT);
+
+  for (let offset = 0; offset < BAR_SEGMENT; offset++) {
+    const position = start - offset;
+    if (position >= 0 && position < BAR_WIDTH) {
+      chars[position] = '█';
+    }
+  }
+
+  return chars.join('');
+}
+
+function renderProgressLine(stage: number, total: number, label: string, startTime: number, frameIndex: number): string {
+  const spinner = SPINNER_FRAMES[frameIndex % SPINNER_FRAMES.length];
+  const bar = buildIndeterminateBar(frameIndex);
+  const elapsed = formatElapsed(startTime);
+  return `  ${chalk.cyan(`[${stage}/${total}]`)} ${chalk.yellow(spinner)} ${chalk.white(label)} ${chalk.blue(`[${bar}]`)} ${chalk.gray(elapsed)}`;
+}
+
+export async function withProgress<T>(
+  stage: number,
+  total: number,
+  label: string,
+  task: () => Promise<T> | T
+): Promise<T> {
+  const startTime = Date.now();
+
+  if (!process.stdout.isTTY) {
+    step(`[${stage}/${total}] ${label}`);
+    const result = await task();
+    console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+    return result;
+  }
+
+  let frameIndex = 0;
+  process.stdout.write(`${renderProgressLine(stage, total, label, startTime, frameIndex)}`);
+
+  const timer = setInterval(() => {
+    frameIndex += 1;
+    process.stdout.write(`\r${renderProgressLine(stage, total, label, startTime, frameIndex)}`);
+  }, 120);
+
+  try {
+    const result = await task();
+    clearInterval(timer);
+    process.stdout.write(`\r${' '.repeat(120)}\r`);
+    console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+    return result;
+  } catch (error) {
+    clearInterval(timer);
+    process.stdout.write(`\r${' '.repeat(120)}\r`);
+    console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+    throw error;
+  }
 }
 
 export function fatal(msg: string): never {
