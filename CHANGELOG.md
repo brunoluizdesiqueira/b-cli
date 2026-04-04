@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.12
+
+### Patch Changes
+
+- ff61245: fix: progress bar
+
 ## 1.0.11
 
 ### Patch Changes
