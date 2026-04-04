@@ -74,7 +74,7 @@ async function getDelphiEnvironment(delphiDir: string): Promise<NodeJS.ProcessEn
     const command = `call "${rsvarsPath}" >nul && set`;
     const result = await execa(
       'cmd.exe',
-      ['/d', '/s', '/c', `"${command}"`],
+      ['/d', '/c', command],
       {
         env: process.env,
       }
