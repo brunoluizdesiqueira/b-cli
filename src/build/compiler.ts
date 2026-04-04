@@ -1,3 +1,4 @@
+import { spawn } from 'child_process';
 import execa from 'execa';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -41,15 +42,27 @@ function buildDependencies(opts: BuildOptions): string {
 
 function quoteForCmd(value: string): string {
   if (!value) return '""';
-  return `"${value.replace(/"/g, '""')}"`;
+  return `"${value.replace(/"/g, '\\"')}"`;
 }
 
 async function runWindowsCommand(executable: string, args: string[], cwd?: string): Promise<void> {
   const command = [quoteForCmd(executable), ...args.map(quoteForCmd)].join(' ');
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(command, {
+      cwd,
+      stdio: 'inherit',
+      shell: true,
+    });
 
-  await execa('cmd.exe', ['/d', '/s', '/c', command], {
-    cwd,
-    stdio: 'inherit',
+    child.on('error', reject);
+    child.on('exit', code => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(new Error(`Command exited with code ${code ?? 'unknown'}`));
+    });
   });
 }
 
