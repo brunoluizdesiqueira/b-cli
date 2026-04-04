@@ -100,6 +100,38 @@ npm run version-packages
 npm run release
 ```
 
+### Troubleshooting do publish automático
+
+Se a PR de release for mergeada, a versão subir para o `package.json`, mas o publish no npm falhar com erro parecido com:
+
+```text
+E404 Not Found - PUT https://registry.npmjs.org/@brunoluizdesiqueira%2fbbuilder-cli - Not found
+```
+
+verifique estes pontos:
+
+1. o Trusted Publisher do pacote está configurado para:
+   - owner/user: `brunoluizdesiqueira`
+   - repository: `b-cli`
+   - workflow: `release.yml`
+2. o repositório GitHub é público
+3. o workflow `Release` tem `permissions.id-token: write`
+4. o workflow roda com Node e npm atuais
+
+O ajuste que resolveu esse cenário neste projeto foi:
+
+- usar `actions/setup-node@v5`
+- executar o workflow com Node `24`
+- atualizar o npm antes do publish
+- definir no `package.json`:
+
+```json
+"publishConfig": {
+  "access": "public",
+  "provenance": true
+}
+```
+
 ## CI/CD
 
 O repositório agora está preparado com GitHub Actions:
