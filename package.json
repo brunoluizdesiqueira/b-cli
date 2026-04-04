@@ -24,7 +24,7 @@
     "LICENSE"
   ],
   "bin": {
-    "bbuilder": "dist/index.js"
+    "bbuilder": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
