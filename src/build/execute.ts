@@ -22,7 +22,13 @@ export async function executeBuild(opts: BuildOptions): Promise<void> {
   const oldRes = path.win32.join(workspaceDir, `${projectName}.res`);
   if (fs.existsSync(oldRes)) fs.unlinkSync(oldRes);
 
-  const resFile = await withProgress(2, totalStages, 'Compilando recursos nativos', () => runCgrc(opts, projectName));
+  const resFile = await withProgress(
+    2,
+    totalStages,
+    'Compilando recursos nativos',
+    () => runCgrc(opts, projectName),
+    { streamingOutput: true }
+  );
 
   await withProgress(3, totalStages, 'Sincronizando recurso final no projeto', () => {
     fs.copyFileSync(resFile, path.win32.join(workspaceDir, `${projectName}.res`));
