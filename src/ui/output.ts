@@ -151,30 +151,19 @@ export async function withProgress<T>(
     drawProgressLine(renderProgressLine(stage, total, label, startTime, frameIndex));
     rendered = true;
   };
-
-  const startTimer = (): void => {
-    if (timer) return;
-
-    timer = setInterval(() => {
-      frameIndex += 1;
-      render();
-    }, 120);
-  };
-
-  const initialDelay = setTimeout(() => {
+  render();
+  timer = setInterval(() => {
+    frameIndex += 1;
     render();
-    startTimer();
-  }, 180);
+  }, 120);
 
   try {
     const result = await task();
-    clearTimeout(initialDelay);
     if (timer) clearInterval(timer);
     if (rendered) clearProgressLine();
     console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
     return result;
   } catch (error) {
-    clearTimeout(initialDelay);
     if (timer) clearInterval(timer);
     if (rendered) clearProgressLine();
     console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
