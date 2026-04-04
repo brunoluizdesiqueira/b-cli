@@ -162,6 +162,8 @@ bbuilder build --type FAST --project faturamento\BimerFaturamento
 bbuilder build --type RELEASE --project Bimer --version 11.3.1
 ```
 
+Durante o build, o CLI exibe feedback visual por etapas com spinner, barra indeterminada e tempo decorrido. Essa barra representa atividade do pipeline, não percentual real do `dcc64`.
+
 ### Atalhos diretos por modo
 ```bash
 bbuilder fast                                        # interativo para projeto/versão

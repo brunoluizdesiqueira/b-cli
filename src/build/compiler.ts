@@ -96,8 +96,6 @@ export async function runCgrc(opts: BuildOptions, projectName: string): Promise<
   const resFile = path.join(tempDir, `${projectName}.res`);
   const delphiEnv = await getDelphiEnvironment(opts.delphiDir);
 
-  step('Compilando recursos e embutindo ícone...');
-
   try {
     await execa(
       path.win32.join(opts.delphiDir, 'bin', 'cgrc.exe'),
@@ -123,8 +121,6 @@ export async function runDcc64(opts: BuildOptions, projectName: string, workspac
 
   if (!fs.existsSync(exeOut)) fs.mkdirSync(exeOut, { recursive: true });
   if (!fs.existsSync(dcuOut)) fs.mkdirSync(dcuOut, { recursive: true });
-
-  step(`Iniciando compilação do código fonte (${opts.type})...`);
 
   const nsValue = 'Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;FireDAC.VCLUI;System.Win;';
   const aliasValue = 'Generics.Collections=System.Generics.Collections;Generics.Defaults=System.Generics.Defaults;WinTypes=Winapi.Windows;WinProcs=Winapi.Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE';
