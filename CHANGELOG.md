@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.9
+
+### Patch Changes
+
+- 3be78f1: fix paths
+
 ## 1.0.8
 
 ### Patch Changes
