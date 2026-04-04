@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.7
+
+### Patch Changes
+
+- 5fca930: add rsvars on cli
+
 ## 1.0.6
 
 ### Patch Changes
