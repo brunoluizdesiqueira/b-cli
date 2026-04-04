@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.10
+
+### Patch Changes
+
+- 8332066: fix rsvars exec
+
 ## 1.0.9
 
 ### Patch Changes
