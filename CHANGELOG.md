@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.18
+
+### Patch Changes
+
+- 411e2c4: refactor readme file
+
 ## 1.0.17
 
 ### Patch Changes
