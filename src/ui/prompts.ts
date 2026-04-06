@@ -40,7 +40,7 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
       type: 'input',
       name: 'version',
       message: 'Versão do EXE? (deixe em branco para manter atual):',
-      default: '',
+      default: '11.3.0',
     });
   }
 

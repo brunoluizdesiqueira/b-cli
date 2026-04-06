@@ -104,7 +104,7 @@ export async function runCli(argv: string[]): Promise<void> {
     .description('Compila um projeto Delphi (interativo se flags omitidas)')
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
-    .option('-v, --version <version>', 'Versão a injetar (ex: 11.2.4)'),
+    .option('-v, --version <version>', 'Versão a injetar (ex: 11.3.0)'),
     HELP_EXAMPLES.build
   )
     .action(async (opts) => {
