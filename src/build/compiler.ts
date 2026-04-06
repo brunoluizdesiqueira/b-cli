@@ -90,6 +90,10 @@ async function getDelphiEnvironment(delphiDir: string): Promise<NodeJS.ProcessEn
   }
 }
 
+export async function ensureDelphiEnvironment(delphiDir: string): Promise<void> {
+  await getDelphiEnvironment(delphiDir);
+}
+
 export async function runCgrc(opts: BuildOptions, projectName: string): Promise<string> {
   const tempDir = path.join(os.tmpdir(), `BimerBuild_${projectName}`);
   const vrcFile = path.join(tempDir, `${projectName}.vrc`);
