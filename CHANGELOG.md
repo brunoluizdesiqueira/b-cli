@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.17
+
+### Patch Changes
+
+- 7f176ac: remove progress bar
+
 ## 1.0.16
 
 ### Patch Changes
