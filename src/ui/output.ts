@@ -1,11 +1,6 @@
 import chalk from 'chalk';
-import * as readline from 'readline';
 
 import { BuildOptions, BuildType } from '../types';
-
-const SPINNER_FRAMES = ['|', '/', '-', '\\'];
-const BAR_WIDTH = 18;
-const BAR_SEGMENT = 6;
 
 export function banner(): void {
   console.log('');
@@ -60,8 +55,8 @@ export function step(msg: string): void {
   console.log(chalk.cyan('  [*]') + ' ' + chalk.white(msg));
 }
 
-function formatElapsed(startTime: number): string {
-  const totalSeconds = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+export function formatElapsedMs(elapsedMs: number): string {
+  const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
   const minutes = Math.floor(totalSeconds / 60)
     .toString()
     .padStart(2, '0');
@@ -70,50 +65,7 @@ function formatElapsed(startTime: number): string {
   return `${minutes}:${seconds}`;
 }
 
-function buildIndeterminateBar(frameIndex: number): string {
-  const chars = new Array(BAR_WIDTH).fill('░');
-  const start = frameIndex % (BAR_WIDTH + BAR_SEGMENT);
-
-  for (let offset = 0; offset < BAR_SEGMENT; offset++) {
-    const position = start - offset;
-    if (position >= 0 && position < BAR_WIDTH) {
-      chars[position] = '█';
-    }
-  }
-
-  return chars.join('');
-}
-
-function truncateLabel(label: string, maxLength: number): string {
-  if (maxLength <= 0) return '';
-  if (label.length <= maxLength) return label;
-  if (maxLength <= 1) return label.slice(0, maxLength);
-  return `${label.slice(0, maxLength - 1)}…`;
-}
-
-function renderProgressLine(stage: number, total: number, label: string, startTime: number, frameIndex: number): string {
-  const spinner = SPINNER_FRAMES[frameIndex % SPINNER_FRAMES.length];
-  const bar = buildIndeterminateBar(frameIndex);
-  const elapsed = formatElapsed(startTime);
-  const columns = process.stdout.columns || 100;
-  const reservedLength = 2 + `[${stage}/${total}]`.length + 1 + 1 + 1 + 1 + 1 + (BAR_WIDTH + 2) + 1 + elapsed.length;
-  const maxLabelLength = Math.max(12, columns - reservedLength);
-  const safeLabel = truncateLabel(label, maxLabelLength);
-  return `  ${chalk.cyan(`[${stage}/${total}]`)} ${chalk.yellow(spinner)} ${chalk.white(safeLabel)} ${chalk.blue(`[${bar}]`)} ${chalk.gray(elapsed)}`;
-}
-
-function drawProgressLine(line: string): void {
-  readline.clearLine(process.stdout, 0);
-  readline.cursorTo(process.stdout, 0);
-  process.stdout.write(line);
-}
-
-function clearProgressLine(): void {
-  readline.clearLine(process.stdout, 0);
-  readline.cursorTo(process.stdout, 0);
-}
-
-export async function withProgress<T>(
+export async function withStep<T>(
   stage: number,
   total: number,
   label: string,
@@ -121,54 +73,28 @@ export async function withProgress<T>(
   options?: { streamingOutput?: boolean }
 ): Promise<T> {
   const startTime = Date.now();
-  const streamingOutput = options?.streamingOutput ?? false;
+  const prefix = `[${stage}/${total}] ${label}`;
 
-  if (!process.stdout.isTTY) {
-    step(`[${stage}/${total}] ${label}`);
-    const result = await task();
-    console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
-    return result;
-  }
-
-  if (streamingOutput) {
-    step(`[${stage}/${total}] ${label}`);
-    try {
-      const result = await task();
-      console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
-      return result;
-    } catch (error) {
-      console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
-      throw error;
-    }
-  }
-
-  let frameIndex = 0;
-  let rendered = false;
-  let timer: NodeJS.Timeout | undefined;
-
-  const render = (): void => {
-    clearProgressLine();
-    drawProgressLine(renderProgressLine(stage, total, label, startTime, frameIndex));
-    rendered = true;
-  };
-  render();
-  timer = setInterval(() => {
-    frameIndex += 1;
-    render();
-  }, 120);
+  step(prefix);
 
   try {
     const result = await task();
-    if (timer) clearInterval(timer);
-    if (rendered) clearProgressLine();
-    console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+    console.log(`  ${chalk.green('OK')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsedMs(Date.now() - startTime)})`)}`);
     return result;
   } catch (error) {
-    if (timer) clearInterval(timer);
-    if (rendered) clearProgressLine();
-    console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsed(startTime)})`)}`);
+    console.log(`  ${chalk.red('FAIL')} ${chalk.white(label)} ${chalk.gray(`(${formatElapsedMs(Date.now() - startTime)})`)}`);
     throw error;
   }
+}
+
+export async function withProgress<T>(
+  stage: number,
+  total: number,
+  label: string,
+  task: () => Promise<T> | T,
+  options?: { streamingOutput?: boolean; minVisibleMs?: number }
+): Promise<T> {
+  return withStep(stage, total, label, task, options);
 }
 
 export function fatal(msg: string): never {
