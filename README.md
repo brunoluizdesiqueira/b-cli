@@ -1,8 +1,7 @@
 # bbuilder-cli
 
-CLI para build local de projetos Delphi do Bimer.
+CLI para build local de projetos Delphi.
 
-Substitui o `build_local.bat` com:
 - seleção interativa de projeto, modo e versão
 - suporte a `FAST`, `DEBUG` e `RELEASE`
 - configuração por arquivo `bbuilder.config.json`
