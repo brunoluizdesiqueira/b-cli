@@ -3,18 +3,22 @@ import chalk from 'chalk';
 import { BuildOptions, BuildType } from '../types';
 
 export function banner(): void {
+  const art = [
+    '  ███   ███   █  █ ███ █    ████ ████ ███ ',
+    '  █  █  █  █  █  █  █  █    █  █ █    █  █',
+    '  ███   ███   █  █  █  █    █  █ ███  ███ ',
+    '  █  █  █  █  █  █  █  █    █  █ █    █ █ ',
+    '  ███   ███    ███ ███ ████ ████ ████ █  █',
+  ];
+
   console.log('');
-  console.log(chalk.blue('  ══════════════════════════════════════════════════════════════'));
-  console.log(chalk.cyan('     ____  _                     ____        _ __    __        '));
-  console.log(chalk.cyan('    / __ )(_)___ ___  ___  _____/ __ )__  __(_) /___/ /        '));
-  console.log(chalk.cyan('   / __  / / __ `__ \\/ _ \\/ ___/ __  / / / / / / __  /         '));
-  console.log(chalk.cyan('  / /_/ / / / / / / /  __/ /  / /_/ / /_/ / / / /_/ /          '));
-  console.log(chalk.cyan(' /_____/_/_/ /_/ /_/\\___/_/  /_____/\\__,_/_/_/\\__,_/           '));
-  console.log(chalk.blue('  ──────────────────────────────────────────────────────────────'));
-  console.log(chalk.green('  [+]') + chalk.white(' Iniciando Pipeline DevOps Local...      ') + chalk.green('[ RUNNING ]'));
-  console.log(chalk.green('  [+]') + chalk.white(' Engatando Motor Embarcadero...          ') + chalk.green('[ STANDBY ]'));
-  console.log(chalk.green('  [+]') + chalk.white(' Sanitizando Caches Fantasmas...         ') + chalk.green('[ CLEARED ]'));
-  console.log(chalk.blue('  ══════════════════════════════════════════════════════════════'));
+  art.forEach((line, index) => {
+    const color = index === 0 || index === art.length - 1 ? chalk.gray : chalk.white;
+    console.log(color(line));
+  });
+  console.log(chalk.gray('  ──────────────────────────────────────────────────────────────────────────────'));
+  console.log(chalk.cyan('  BBuilder') + chalk.gray('  local delphi build runner'));
+  console.log(chalk.gray('  doctor') + chalk.gray('  ambiente  ·  ') + chalk.gray('config') + chalk.gray('  projeto  ·  ') + chalk.gray('build') + chalk.gray('  execucao'));
   console.log('');
 }
 
