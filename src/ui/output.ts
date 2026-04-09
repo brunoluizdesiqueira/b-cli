@@ -40,18 +40,22 @@ export function printBuildHeader(opts: BuildOptions, projectName: string, worksp
 
 export function printSuccess(buildType: BuildType): void {
   console.log('');
-  console.log(chalk.red('       .oooooo.         ') + chalk.green(' _____________________________________________'));
-  console.log(chalk.red('     .o00000000o.       ') + chalk.green('   _____ _    _  _____ _____ ______  _____ _____ '));
-  console.log(chalk.red('    .00') + chalk.white('######') + chalk.red('0000.      ') + chalk.green('  / ____| |  | |/ ____/ ____|  ____/ ____|/ ____|'));
-  console.log(chalk.red('    000') + chalk.white('##') + chalk.red('0000') + chalk.white('##') + chalk.red('000      ') + chalk.green(' | (___ | |  | | |   | |    | |__  \\___  \\___  |'));
-  console.log(chalk.red('    000') + chalk.white('##') + chalk.red('00000') + chalk.white('##') + chalk.red('00      ') + chalk.green('  \\___ \\| |  | | |   | |    |  __|  ___ \\  ___ |'));
-  console.log(chalk.red('    000') + chalk.white('##') + chalk.red('0000') + chalk.white('##') + chalk.red('000      ') + chalk.green('  ____) | |__| | |___| |____| |____ ____) |____) |'));
-  console.log(chalk.red("    `00") + chalk.white('######') + chalk.red("0000'      ") + chalk.green(' |_____/ \\____/ \\_____\\_____|______|_____/|_____/'));
-  console.log(chalk.red("     `o00000000o'       ") + chalk.green(' _____________________________________________'));
-  console.log(chalk.red("       `oooooo'         ") + chalk.cyan('  [*] ') + chalk.white('Build ') + chalk.yellow(buildType) + chalk.white(' finalizado com êxito absoluto!'));
-  console.log(chalk.red('                        ') + chalk.cyan('  [*] ') + chalk.white('Artefatos validados, versionados e linkados na raiz.'));
-  console.log(chalk.red('                        ') + chalk.green('  [ RUN ] O ecossistema está pronto para combate.'));
-  console.log(chalk.green('                        _____________________________________________'));
+  const art = [
+    '  ████  █   █  ███   ███   ████  ████  ████ ',
+    '  █     █   █ █   █ █   █  █     █     █    ',
+    '  ███   █   █ █     █     ███    ███   ███  ',
+    '     █  █   █ █   █ █   █  █        █     █ ',
+    '  ████   ███   ███   ███   ████  ████  ████ ',
+  ];
+
+  art.forEach((line, index) => {
+    const color = index === 0 || index === art.length - 1 ? chalk.green : chalk.white;
+    console.log(color(line));
+  });
+  console.log(chalk.green('  ──────────────────────────────────────────────────────────────'));
+  console.log(chalk.cyan('  [ok] ') + chalk.white('Build ') + chalk.yellow(buildType) + chalk.white(' finalizado com sucesso.'));
+  console.log(chalk.cyan('  [ok] ') + chalk.white('Artefatos validados e recursos aplicados.'));
+  console.log(chalk.cyan('  [run]') + chalk.white(' Pipeline concluído.'));
   console.log('');
 }
 
