@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.20
+
+### Patch Changes
+
+- 6c9bdb0: change banner
+
 ## 1.0.19
 
 ### Patch Changes
