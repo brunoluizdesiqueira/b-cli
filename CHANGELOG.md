@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.22
+
+### Patch Changes
+
+- 9f502e3: ajust print build header
+
 ## 1.0.21
 
 ### Patch Changes
