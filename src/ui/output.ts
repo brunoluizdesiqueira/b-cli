@@ -2,6 +2,48 @@ import chalk from 'chalk';
 
 import { BuildOptions, BuildType } from '../types';
 
+const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
+
+function visibleLength(value: string): number {
+  const text = value.replace(ANSI_PATTERN, '');
+  let length = 0;
+
+  for (const char of text) {
+    const code = char.codePointAt(0) || 0;
+
+    if (
+      (code >= 0x0300 && code <= 0x036f) ||
+      (code >= 0x1ab0 && code <= 0x1aff) ||
+      (code >= 0x1dc0 && code <= 0x1dff) ||
+      (code >= 0x20d0 && code <= 0x20ff) ||
+      (code >= 0xfe20 && code <= 0xfe2f)
+    ) {
+      continue;
+    }
+
+    if (
+      code >= 0x1100 &&
+      (code <= 0x115f ||
+        code === 0x2329 ||
+        code === 0x232a ||
+        (code >= 0x2e80 && code <= 0xa4cf && code !== 0x303f) ||
+        (code >= 0xac00 && code <= 0xd7a3) ||
+        (code >= 0xf900 && code <= 0xfaff) ||
+        (code >= 0xfe10 && code <= 0xfe19) ||
+        (code >= 0xfe30 && code <= 0xfe6f) ||
+        (code >= 0xff00 && code <= 0xff60) ||
+        (code >= 0xffe0 && code <= 0xffe6))
+    ) {
+      length += 2;
+      continue;
+    }
+
+    length += 1;
+  }
+
+  return length;
+}
+
 export function banner(): void {
   const art = [
     '  ███   ███   █  █ ███ █    ████ ████ ███ ',
@@ -29,12 +71,20 @@ export function printBuildHeader(opts: BuildOptions, projectName: string, worksp
     RELEASE: chalk.green,
   };
   const col = typeColor[opts.type];
+  const rows = [
+    `${chalk.magenta('[ PROJETO ]')} ${chalk.white(projectName)}`,
+    `${chalk.magenta('[ CAMINHO ]')} ${chalk.white(workspaceDir)}`,
+    `${chalk.magenta('[ VERSÃO  ]')} ${chalk.yellow(opts.version || '(atual)')} (Base: ${opts.envVersion})`,
+    `${chalk.magenta('[ PROFILE ]')} ${col(opts.type)}`,
+  ];
+  const boxWidth = Math.max(...rows.map(visibleLength));
 
-  console.log(chalk.magenta('  [ PROJETO ]') + ' ' + chalk.white(projectName));
-  console.log(chalk.magenta('  [ CAMINHO ]') + ' ' + chalk.white(workspaceDir));
-  console.log(chalk.magenta('  [ VERSÃO  ]') + ' ' + chalk.yellow(opts.version || '(atual)') + ` (Base: ${opts.envVersion})`);
-  console.log(chalk.magenta('  [ PROFILE ]') + ' ' + col(opts.type));
-  console.log(chalk.blue('  ──────────────────────────────────────────────────────────────'));
+  console.log(chalk.gray(`  ┌${'─'.repeat(boxWidth + 2)}┐`));
+  rows.forEach(row => {
+    const padding = ' '.repeat(Math.max(0, boxWidth - visibleLength(row)));
+    console.log(chalk.gray('  │ ') + row + padding + chalk.gray(' │'));
+  });
+  console.log(chalk.gray(`  └${'─'.repeat(boxWidth + 2)}┘`));
   console.log('');
 }
 
