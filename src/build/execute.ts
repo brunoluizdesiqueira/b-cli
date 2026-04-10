@@ -10,8 +10,6 @@ import { prepareProjectResources } from './resources';
 export async function executeBuild(opts: BuildOptions): Promise<void> {
   const totalStages = 5;
 
-  banner();
-
   const { workspaceDir, projectName } = resolveProject(opts.project, opts.repoBase);
   printBuildHeader(opts, projectName, workspaceDir);
 
