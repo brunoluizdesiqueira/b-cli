@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.21
+
+### Patch Changes
+
+- 46aa79d: change print succeess
+
 ## 1.0.20
 
 ### Patch Changes
