@@ -330,7 +330,7 @@
             position: relative;
         }
 
-        .step-image img {
+        .step-image img, .step-image iframe {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -532,6 +532,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+        }
+
+        .diagnostic-image video, .diagnostic-image iframe, .diagnostic-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border: none;
         }
 
         /* Install */
@@ -699,21 +707,13 @@
                         <code>npm install -g @brunoluizdesiqueira/bbuilder-cli</code>
                     </div>
                     <div class="step-image">
-                        <!-- TODO: Substituir por captura real -->
-                        <div class="placeholder">
-                            <div class="placeholder-icon">📸</div>
-                            <div class="placeholder-text">Captura: Instalação</div>
-                        </div>
+                        <iframe loading="lazy" src="https://www.canva.com/design/DAHGjSBPBeQ/INKkfSU6gauaMEKKdCbC_w/watch?embed" allowfullscreen allow="fullscreen"></iframe>
                     </div>
                 </div>
 
                 <div class="step">
                     <div class="step-image">
-                        <!-- TODO: Substituir por captura real -->
-                        <div class="placeholder">
-                            <div class="placeholder-icon">📸</div>
-                            <div class="placeholder-text">Captura: Config Init</div>
-                        </div>
+                        <iframe loading="lazy" src="https://www.canva.com/design/DAHGjlg__J8/Q2D_H-lpsSw_Sb8HCbmrgw/watch?embed" allowfullscreen allow="fullscreen"></iframe>
                     </div>
                     <div class="step-content">
                         <div class="step-number">Passo 2</div>
@@ -731,11 +731,7 @@
                         <code>bbuilder fast --project Bimer</code>
                     </div>
                     <div class="step-image">
-                        <!-- TODO: Substituir por captura real -->
-                        <div class="placeholder">
-                            <div class="placeholder-icon">📸</div>
-                            <div class="placeholder-text">Captura: Build</div>
-                        </div>
+                        <iframe loading="lazy" src="https://www.canva.com/design/DAHGjho1-qc/K59bO_mfu3Z8quKgU9EH7g/watch?embed" allowfullscreen allow="fullscreen"></iframe>
                     </div>
                 </div>
             </div>
@@ -858,11 +854,7 @@
                     </div>
                 </div>
                 <div class="diagnostic-image">
-                    <!-- TODO: Substituir por captura real do doctor -->
-                    <div class="placeholder">
-                        <div class="placeholder-icon">📸</div>
-                        <div class="placeholder-text">Captura: Doctor Output</div>
-                    </div>
+                    <iframe loading="lazy" src="https://www.canva.com/design/DAHGjZfl8qw/cy_vgd9CpCDSFBfvxzLvBA/watch?embed" allowfullscreen allow="fullscreen"></iframe>
                 </div>
             </div>
         </div>
@@ -882,7 +874,7 @@
 
     <footer>
         <div class="container">
-            <p>BBuilder CLI - Desenvolvido para o time Bimer</p>
+            <p>BBuilder CLI - by Bruno Siqueira</p>
         </div>
     </footer>
 </body>
