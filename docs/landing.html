@@ -655,7 +655,7 @@
         <div class="container">
             <div class="section-header">
                 <h2>Por que usar?</h2>
-                <p>告别IDE lenta, olá terminal rápido</p>
+                <p>IDE lenta, olá terminal rápido</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card">
@@ -877,5 +877,31 @@
             <p>BBuilder CLI - by Bruno Siqueira</p>
         </div>
     </footer>
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const iframe = entry.target;
+                let src = iframe.getAttribute('data-src');
+
+                if (!src) {
+                    src = iframe.getAttribute('src');
+                    iframe.setAttribute('data-src', src);
+                }
+
+                if (entry.isIntersecting) {
+                    const activeSrc = src.includes('?') 
+                        ? src + '&autoplay=1' 
+                        : src + '?autoplay=1';
+                    iframe.setAttribute('src', activeSrc);
+                } else {
+                    iframe.setAttribute('src', src);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('iframe').forEach(iframe => {
+            observer.observe(iframe);
+        });
+    </script>
 </body>
 </html>
