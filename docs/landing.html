@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBuilder CLI - Build Delphi pelo Terminal</title>
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #161616;
+            --bg-tertiary: #1f1f1f;
+            --accent: #00d4aa;
+            --accent-dim: #00a88a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border: #2a2a2a;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 100px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent), #00ffcc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .hero .badge {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .hero .badge code {
+            color: var(--accent);
+            background: none;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dim);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .terminal-preview {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .terminal-preview .header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 0;
+            border: none;
+        }
+
+        .terminal-preview .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca40; }
+
+        .terminal-preview code {
+            font-family: 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .terminal-preview code .prompt {
+            color: var(--accent);
+        }
+
+        .terminal-preview code .cmd {
+            color: var(--text-primary);
+        }
+
+        /* Features */
+        .features {
+            padding: 80px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Steps */
+        .steps {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 48px;
+            align-items: start;
+        }
+
+        .step-content {
+            padding-top: 20px;
+        }
+
+        .step-number {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .step h3 {
+            font-size: 1.75rem;
+            margin-bottom: 16px;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .step code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .step-image {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            aspect-ratio: 16/10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .step-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .step-image .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px;
+        }
+
+        .step-image .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .step-image .placeholder-text {
+            font-size: 0.95rem;
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Modes */
+        .modes {
+            padding: 80px 0;
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .mode-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .mode-card.active {
+            border-color: var(--accent);
+            background: linear-gradient(180deg, rgba(0, 212, 170, 0.05), transparent);
+        }
+
+        .mode-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.5rem;
+        }
+
+        .mode-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .mode-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .mode-tag {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .mode-tag.fast { color: #22c55e; }
+        .mode-tag.debug { color: #3b82f6; }
+        .mode-tag.release { color: #f59e0b; }
+
+        /* Commands */
+        .commands {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .command-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .command-header {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .command-header h4 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .command-body {
+            padding: 20px;
+        }
+
+        .command-body code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            display: block;
+        }
+
+        .command-body .cmd-line {
+            color: var(--text-secondary);
+        }
+
+        .command-body .cmd {
+            color: var(--text-primary);
+        }
+
+        .command-body .comment {
+            color: var(--text-muted);
+        }
+
+        /* Diagnostic */
+        .diagnostic {
+            padding: 80px 0;
+        }
+
+        .diagnostic-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .diagnostic-text h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .diagnostic-text p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .diagnostic-checks {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .check-icon.ok {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .check-icon.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .diagnostic-image {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            aspect-ratio: 16/10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Install */
+        .install {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+            text-align: center;
+        }
+
+        .install h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .install p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .install code {
+            background: var(--bg-tertiary);
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .features-grid,
+            .modes-grid,
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                grid-template-columns: 1fr;
+            }
+
+            .diagnostic-content {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo"><span>B</span>Builder</div>
+            <nav>
+                <a href="#features">Recursos</a>
+                <a href="#como-usar">Como Usar</a>
+                <a href="#instalar">Instalar</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="badge">npm install -g <code>@brunoluizdesiqueira/bbuilder-cli</code></div>
+            <h1>Build Delphi pelo<br><span>Terminal</span></h1>
+            <p>Compile seus projetos Delphi direto do terminal, sem abrir a IDE. Rápido, simples e eficiente.</p>
+            <div class="cta-group">
+                <a href="#instalar" class="btn btn-primary">Instalar Agora</a>
+                <a href="#como-usar" class="btn btn-secondary">Ver Como Usar</a>
+            </div>
+            <div class="terminal-preview">
+                <div class="header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <code>
+                    <span class="prompt">$</span> <span class="cmd">bbuilder</span><br>
+                    ? Selecione o projeto: <span style="color: var(--accent)">BimerFaturamento</span><br>
+                    ? Selecione o modo: <span style="color: var(--accent)">FAST</span><br>
+                    ? Selecione a versao: <span style="color: var(--accent)">11.3.1</span><br>
+                    <br>
+                    <span style="color: var(--success)">✓</span> Carregando ambiente Delphi... (1.2s)<br>
+                    <span style="color: var(--success)">✓</span> Preparando recursos... (0.8s)<br>
+                    <span style="color: var(--success)">✓</span> Compilando recursos... (2.1s)<br>
+                    <span style="color: var(--success)">✓</span> Compilando projeto... (8.4s)<br>
+                    <br>
+                    <span style="color: var(--success)">Build concluido!</span>
+                </code>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Por que usar?</h2>
+                <p>告别IDE lenta, olá terminal rápido</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Build Rápido</h3>
+                    <p>Compile projetos Delphi diretamente pelo terminal, sem esperar a IDE carregar.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Modos Flexíveis</h3>
+                    <p>Escolha entre FAST, DEBUG ou RELEASE conforme sua necessidade.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Configuração Simples</h3>
+                    <p>Arquivo JSON para gerenciar projetos e paths, fácil de manter.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Interface Interativa</h3>
+                    <p>Menu interativo para selecionar projeto, modo e versão rapidamente.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Diagnóstico</h3>
+                    <p>Comando doctor para verificar automaticamente problemas no ambiente.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Gerenciamento</h3>
+                    <p>Liste, adicione e remova projetos facilmente via CLI.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="steps" id="como-usar">
+        <div class="container">
+            <div class="section-header">
+                <h2>Como Usar</h2>
+                <p>Do install ao build em 3 passos</p>
+            </div>
+            <div class="steps-list">
+                <div class="step">
+                    <div class="step-content">
+                        <div class="step-number">Passo 1</div>
+                        <h3>Instalar o BBuilder</h3>
+                        <p>Instale globalmente via npm. Uma linha, pronto.</p>
+                        <code>npm install -g @brunoluizdesiqueira/bbuilder-cli</code>
+                    </div>
+                    <div class="step-image">
+                        <!-- TODO: Substituir por captura real -->
+                        <div class="placeholder">
+                            <div class="placeholder-icon">📸</div>
+                            <div class="placeholder-text">Captura: Instalação</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-image">
+                        <!-- TODO: Substituir por captura real -->
+                        <div class="placeholder">
+                            <div class="placeholder-icon">📸</div>
+                            <div class="placeholder-text">Captura: Config Init</div>
+                        </div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-number">Passo 2</div>
+                        <h3>Criar Configuração</h3>
+                        <p>Execute <code>config init</code> para criar o arquivo de configuração base.</p>
+                        <code>bbuilder config init</code>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-content">
+                        <div class="step-number">Passo 3</div>
+                        <h3>Compilar Projeto</h3>
+                        <p>Execute <code>bbuilder</code> para modo interativo ou use atalhos como <code>bbuilder fast</code>.</p>
+                        <code>bbuilder fast --project Bimer</code>
+                    </div>
+                    <div class="step-image">
+                        <!-- TODO: Substituir por captura real -->
+                        <div class="placeholder">
+                            <div class="placeholder-icon">📸</div>
+                            <div class="placeholder-text">Captura: Build</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="modes">
+        <div class="container">
+            <div class="section-header">
+                <h2>Modos de Build</h2>
+                <p>Escolha o modo ideal para cada situação</p>
+            </div>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <div class="mode-icon">⚡</div>
+                    <h3>FAST</h3>
+                    <p>Compilação rápida, sem rebuild completo. Ideal para testes durante desenvolvimento.</p>
+                    <span class="mode-tag fast">Executa após compilar</span>
+                </div>
+                <div class="mode-card active">
+                    <div class="mode-icon">🐛</div>
+                    <h3>DEBUG</h3>
+                    <p>Build completo com símbolos de debug. Use para investigar problemas.</p>
+                    <span class="mode-tag debug">Executa após compilar</span>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-icon">🚀</div>
+                    <h3>RELEASE</h3>
+                    <p>Build otimizado para produção. Gera o executável final.</p>
+                    <span class="mode-tag release"> Não executa</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="commands">
+        <div class="container">
+            <div class="section-header">
+                <h2>Comandos</h2>
+                <p>Todos os comandos disponíveis</p>
+            </div>
+            <div class="commands-grid">
+                <div class="command-card">
+                    <div class="command-header">
+                        <h4>Build</h4>
+                    </div>
+                    <div class="command-body">
+                        <code>
+                            <span class="cmd-line"><span class="cmd">bbuilder</span></span>
+                            <span class="cmd-line"><span class="cmd">bbuilder build</span> -t DEBUG -p Bimer</span>
+                            <span class="cmd-line"><span class="cmd">bbuilder fast</span> -p Bimer</span>
+                            <span class="cmd-line"><span class="cmd">bbuilder debug</span> -p BimerFaturamento</span>
+                            <span class="cmd-line"><span class="cmd">bbuilder release</span> -p Bimer</span>
+                        </code>
+                    </div>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <h4>Projetos</h4>
+                    </div>
+                    <div class="command-body">
+                        <code>
+                            <span class="cmd-line"><span class="cmd">bbuilder project list</span></span>
+                            <span class="cmd-line"><span class="cmd">bbuilder project add</span></span>
+                            <span class="cmd-line"><span class="cmd">bbuilder project remove</span> -n Bimer</span>
+                        </code>
+                    </div>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <h4>Configuração</h4>
+                    </div>
+                    <div class="command-body">
+                        <code>
+                            <span class="cmd-line"><span class="cmd">bbuilder config init</span></span>
+                            <span class="cmd-line"><span class="cmd">bbuilder config show</span></span>
+                            <span class="cmd-line"><span class="cmd">bbuilder config validate</span></span>
+                        </code>
+                    </div>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <h4>Diagnóstico</h4>
+                    </div>
+                    <div class="command-body">
+                        <code>
+                            <span class="cmd-line"><span class="cmd">bbuilder doctor</span></span>
+                            <span class="cmd-line"><span class="comment"># Verifica ambiente</span></span>
+                            <span class="cmd-line"><span class="comment"># sugere correções</span></span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="diagnostic">
+        <div class="container">
+            <div class="diagnostic-content">
+                <div class="diagnostic-text">
+                    <h2>Diagnóstico Automático</h2>
+                    <p>O comando <code>doctor</code> verifica automaticamente:</p>
+                    <div class="diagnostic-checks">
+                        <div class="check-item">
+                            <div class="check-icon ok">✓</div>
+                            <span>Caminhos do Delphi configurados</span>
+                        </div>
+                        <div class="check-item">
+                            <div class="check-icon ok">✓</div>
+                            <span>Binários (cgrc, dcc64) acessíveis</span>
+                        </div>
+                        <div class="check-item">
+                            <div class="check-icon ok">✓</div>
+                            <span>Projetos existem fisicamente</span>
+                        </div>
+                        <div class="check-item">
+                            <div class="check-icon error">!</div>
+                            <span>dependencyPaths disponíveis</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="diagnostic-image">
+                    <!-- TODO: Substituir por captura real do doctor -->
+                    <div class="placeholder">
+                        <div class="placeholder-icon">📸</div>
+                        <div class="placeholder-text">Captura: Doctor Output</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="install" id="instalar">
+        <div class="container">
+            <h2>Instalar Agora</h2>
+            <p>Uma linha no terminal, pronto para usar.</p>
+            <code>npm install -g @brunoluizdesiqueira/bbuilder-cli</code>
+            <div class="cta-group">
+                <a href="#" class="btn btn-primary">Instalar</a>
+                <a href="https://github.com/brunoluizdesiqueira/b-cli" class="btn btn-secondary">Ver no GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>BBuilder CLI - Desenvolvido para o time Bimer</p>
+        </div>
+    </footer>
+</body>
+</html>
