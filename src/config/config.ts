@@ -179,13 +179,16 @@ export function loadConfig(configPath: string): Config {
       const libRoot = merged.libRoot || DEFAULT_CONFIG_BASE.libRoot;
       const envVersion = merged.envVersion || DEFAULT_CONFIG_BASE.envVersion;
 
-      if (parsed.libExternos?.includes('${libRoot}') || !parsed.libExternos) {
+      const isLegacyLibRoot = libRoot.endsWith('Externos\\3.00');
+
+      if (isLegacyLibRoot) {
+        merged.libRoot = libRoot.replace('\\Externos\\3.00', '');
+        merged.libExternos = libRoot;
+        merged.libErp = `${merged.libRoot}\\ERP\\${envVersion}`;
+        merged.libAlterdata = `${merged.libRoot}\\LibAlterdata\\1.0.0`;
+      } else {
         merged.libExternos = resolveLibTemplate(DEFAULT_CONFIG_BASE.libExternos, libRoot);
-      }
-      if (parsed.libErp?.includes('${libRoot}') || !parsed.libErp) {
         merged.libErp = resolveLibTemplate(DEFAULT_CONFIG_BASE.libErp, libRoot, envVersion);
-      }
-      if (parsed.libAlterdata?.includes('${libRoot}') || !parsed.libAlterdata) {
         merged.libAlterdata = resolveLibTemplate(DEFAULT_CONFIG_BASE.libAlterdata, libRoot);
       }
 
