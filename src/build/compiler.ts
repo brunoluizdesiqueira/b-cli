@@ -6,6 +6,10 @@ import * as path from 'path';
 import { BuildOptions, BuildType } from '../types';
 import { fatal, step } from '../ui/output';
 
+function resolveEnvTemplate(template: string, envVersion: string): string {
+  return template.replace(/\$\{envVersion\}/g, envVersion).replace(/\$envVersion/g, envVersion);
+}
+
 const delphiEnvCache = new Map<string, NodeJS.ProcessEnv>();
 
 export function buildCompilerFlags(buildType: BuildType): { flags: string[]; defines: string; runAfter: boolean } {
@@ -119,8 +123,8 @@ export async function runCgrc(opts: BuildOptions, projectName: string): Promise<
 export async function runDcc64(opts: BuildOptions, projectName: string, workspaceDir: string): Promise<void> {
   const { flags, defines } = buildCompilerFlags(opts.type);
   const deps = buildDependencies(opts);
-  const exeOut = path.win32.join('C:\\Temp', opts.envVersion, 'EXE');
-  const dcuOut = path.win32.join('C:\\Temp', opts.envVersion, 'DCU');
+  const exeOut = resolveEnvTemplate(opts.exeOutputDir, opts.envVersion);
+  const dcuOut = resolveEnvTemplate(opts.dcuOutputDir, opts.envVersion);
   const delphiEnv = await getDelphiEnvironment(opts.delphiDir);
 
   if (!fs.existsSync(exeOut)) fs.mkdirSync(exeOut, { recursive: true });
@@ -168,7 +172,7 @@ export function runBuiltExecutable(opts: BuildOptions, projectName: string): voi
 
   if (!runAfter) return;
 
-  const exeOut = path.win32.join('C:\\Temp', opts.envVersion, 'EXE', `${projectName}.exe`);
+  const exeOut = path.win32.join(resolveEnvTemplate(opts.exeOutputDir, opts.envVersion), `${projectName}.exe`);
   step(`Iniciando ${projectName}.exe...`);
   execa(exeOut, [], { detached: true, stdio: 'ignore' }).unref();
 }
