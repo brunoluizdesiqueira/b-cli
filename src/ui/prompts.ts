@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 
-import { buildDefaultDependencyPaths, saveConfig } from '../config/config';
+import { buildDefaultDependencyPaths, resolveLibTemplate, saveConfig } from '../config/config';
 import { BuildOptions, BuildType, Config } from '../types';
 
 export async function promptBuild(config: Config, cliType?: string, cliProject?: string, cliVersion?: string): Promise<BuildOptions> {
@@ -54,9 +54,12 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
     delphiDir: config.delphiDir,
     envVersion: config.envVersion,
     libRoot: config.libRoot,
+    libExternos: config.libExternos,
     libErp: config.libErp,
     libAlterdata: config.libAlterdata,
     dependencyPaths: config.dependencyPaths,
+    exeOutputDir: config.exeOutputDir,
+    dcuOutputDir: config.dcuOutputDir,
   };
 }
 
@@ -72,18 +75,27 @@ export async function runConfigInit(config: Config, configPath: string): Promise
     { type: 'input', name: 'libRoot', message: 'LibraryDelphiAlexandria root:', default: config.libRoot },
   ] as any);
 
-  const libErp = `C:\\LibraryDelphiAlexandria\\ERP\\${answers.envVersion}`;
+  const libRoot = answers.libRoot || 'C:\\LibraryDelphiAlexandria';
+  const libExternosTemplate = answers.libExternos || '${libRoot}\\Externos\\3.00';
+  const libErpTemplate = answers.libErp || '${libRoot}\\ERP\\${envVersion}';
+  const libAlterdataTemplate = answers.libAlterdata || '${libRoot}\\LibAlterdata\\1.0.0';
+  const exeOutputDir = answers.exeOutputDir || 'C:\\Temp\\${envVersion}\\EXE';
+  const dcuOutputDir = answers.dcuOutputDir || 'C:\\Temp\\${envVersion}\\DCU';
   const newConfig: Config = {
     ...config,
     ...answers,
-    libErp,
-    libAlterdata: config.libAlterdata,
+    libRoot,
+    libExternos: libExternosTemplate,
+    libErp: libErpTemplate,
+    libAlterdata: libAlterdataTemplate,
+    exeOutputDir,
+    dcuOutputDir,
     dependencyPaths: buildDefaultDependencyPaths({
       repoBase: answers.repoBase,
       delphiDir: answers.delphiDir,
-      libRoot: answers.libRoot,
-      libErp,
-      libAlterdata: config.libAlterdata,
+      libExternos: resolveLibTemplate(libExternosTemplate, libRoot),
+      libErp: resolveLibTemplate(libErpTemplate, libRoot, answers.envVersion),
+      libAlterdata: resolveLibTemplate(libAlterdataTemplate, libRoot),
     }),
   };
 

@@ -8,43 +8,60 @@ export const CONFIG_FILENAME = 'bbuilder.config.json';
 export const LEGACY_CONFIG_FILENAME = 'bimer.config.json';
 export const CONFIG_ENV_VAR = 'BBUILDER_CONFIG';
 
+export function resolveLibTemplate(template: string, libRoot: string, envVersion?: string): string {
+  let result = template
+    .replace(/\$\{libRoot\}/g, libRoot)
+    .replace(/\$libRoot/g, libRoot);
+  
+  if (envVersion) {
+    result = result
+      .replace(/\$\{envVersion\}/g, envVersion)
+      .replace(/\$envVersion/g, envVersion);
+  }
+  
+  return result;
+}
+
 const DEFAULT_CONFIG_BASE = {
   repoBase: 'C:\\git\\bimer',
   delphiDir: 'C:\\Program Files (x86)\\Embarcadero\\Studio\\22.0',
   envVersion: '11.03.00',
-  libRoot: 'C:\\LibraryDelphiAlexandria\\Externos\\3.00',
-  libErp: 'C:\\LibraryDelphiAlexandria\\ERP\\11.03.00',
-  libAlterdata: 'C:\\LibraryDelphiAlexandria\\LibAlterdata\\1.0.0',
+  libRoot: 'C:\\LibraryDelphiAlexandria',
+  libExternos: '${libRoot}\\Externos\\3.00',
+  libErp: '${libRoot}\\ERP\\${envVersion}',
+  libAlterdata: '${libRoot}\\LibAlterdata\\1.0.0',
+  exeOutputDir: 'C:\\Temp\\${envVersion}\\EXE',
+  dcuOutputDir: 'C:\\Temp\\${envVersion}\\DCU',
 };
 
-export function buildDefaultDependencyPaths(params: Pick<Config, 'repoBase' | 'delphiDir' | 'libRoot' | 'libErp' | 'libAlterdata'>): string[] {
-  const { repoBase, delphiDir, libRoot, libErp, libAlterdata } = params;
+export function buildDefaultDependencyPaths(params: Pick<Config, 'repoBase' | 'delphiDir' | 'libExternos' | 'libErp' | 'libAlterdata'>): string[] {
+  const { repoBase, delphiDir, libExternos, libErp, libAlterdata } = params;
 
   return [
     `${repoBase}\\dependencies`,
     `${delphiDir}\\lib\\Win64\\release`,
-    `${libRoot}\\sgcWebSockets\\Win64`,
-    `${libRoot}\\DevExpress\\Win64`,
-    `${libRoot}\\dataset-serialize\\Win64`,
-    `${libRoot}\\UniDAC\\Win64`,
-    `${libRoot}\\EurekaLog\\Common`,
-    `${libRoot}\\EurekaLog\\Win64`,
-    `${libRoot}\\SMImport\\Win64`,
-    `${libRoot}\\SMExport\\Win64`,
-    `${libRoot}\\RXLibrary\\Win64`,
-    `${libRoot}\\ReportBuilder\\Win64`,
-    `${libRoot}\\ComPort\\Win64`,
-    `${libRoot}\\QuickReport\\Win64`,
-    `${libRoot}\\FastMM\\Win64`,
-    `${libRoot}\\Tee\\Win64`,
-    `${libRoot}\\ExtraDevices\\Win64`,
-    `${libRoot}\\ExtraFilter\\Win64`,
+    `${libExternos}\\sgcWebSockets\\Win64`,
+    `${libExternos}\\DevExpress\\Win64`,
+    `${libExternos}\\dataset-serialize\\Win64`,
+    `${libExternos}\\UniDAC\\Win64`,
+    `${libExternos}\\EurekaLog\\Common`,
+    `${libExternos}\\EurekaLog\\Win64`,
+    `${libExternos}\\SMImport\\Win64`,
+    `${libExternos}\\SMExport\\Win64`,
+    `${libExternos}\\RXLibrary\\Win64`,
+    `${libExternos}\\ReportBuilder\\Win64`,
+    `${libExternos}\\ComPort\\Win64`,
+    `${libExternos}\\QuickReport\\Win64`,
+    `${libExternos}\\FastMM\\Win64`,
+    `${libExternos}\\Tee\\Win64`,
+    `${libExternos}\\ExtraDevices\\Win64`,
+    `${libExternos}\\ExtraFilter\\Win64`,
     `${libErp}\\Win64`,
-    `${libRoot}\\ZipForge\\Win64`,
-    `${libRoot}\\FortesReport\\Win64`,
-    `${libRoot}\\TBGWebCharts\\Win64`,
-    `${libRoot}\\EventBus\\Win64`,
-    `${libRoot}\\Horse\\Win64`,
+    `${libExternos}\\ZipForge\\Win64`,
+    `${libExternos}\\FortesReport\\Win64`,
+    `${libExternos}\\TBGWebCharts\\Win64`,
+    `${libExternos}\\EventBus\\Win64`,
+    `${libExternos}\\Horse\\Win64`,
     `${libAlterdata}\\feedbacker`,
     `${libAlterdata}\\rest-client`,
   ];
@@ -52,13 +69,23 @@ export function buildDefaultDependencyPaths(params: Pick<Config, 'repoBase' | 'd
 
 export const DEFAULT_CONFIG: Config = {
   ...DEFAULT_CONFIG_BASE,
-  dependencyPaths: buildDefaultDependencyPaths(DEFAULT_CONFIG_BASE),
+  libExternos: resolveLibTemplate(DEFAULT_CONFIG_BASE.libExternos, DEFAULT_CONFIG_BASE.libRoot),
+  libErp: resolveLibTemplate(DEFAULT_CONFIG_BASE.libErp, DEFAULT_CONFIG_BASE.libRoot, DEFAULT_CONFIG_BASE.envVersion),
+  libAlterdata: resolveLibTemplate(DEFAULT_CONFIG_BASE.libAlterdata, DEFAULT_CONFIG_BASE.libRoot),
+  dependencyPaths: buildDefaultDependencyPaths({
+    ...DEFAULT_CONFIG_BASE,
+    libExternos: resolveLibTemplate(DEFAULT_CONFIG_BASE.libExternos, DEFAULT_CONFIG_BASE.libRoot),
+    libErp: resolveLibTemplate(DEFAULT_CONFIG_BASE.libErp, DEFAULT_CONFIG_BASE.libRoot, DEFAULT_CONFIG_BASE.envVersion),
+    libAlterdata: resolveLibTemplate(DEFAULT_CONFIG_BASE.libAlterdata, DEFAULT_CONFIG_BASE.libRoot),
+  }),
   projects: {
     BimerFaturamento: 'faturamento\\BimerFaturamento',
     Bimer: 'Bimer',
     LiberadorEstoque: 'geral\\gerenteeletronico.jobs.liberadorestoque\\LiberadorEstoque',
     BimerEstoque: 'estoque\\BimerEstoque',
   },
+  exeOutputDir: DEFAULT_CONFIG_BASE.exeOutputDir,
+  dcuOutputDir: DEFAULT_CONFIG_BASE.dcuOutputDir,
 };
 
 function deriveProjectName(projectPath: string): string {
@@ -148,6 +175,19 @@ export function loadConfig(configPath: string): Config {
         ...parsed,
         projects: normalizeProjects(parsed.projects),
       };
+
+      const libRoot = merged.libRoot || DEFAULT_CONFIG_BASE.libRoot;
+      const envVersion = merged.envVersion || DEFAULT_CONFIG_BASE.envVersion;
+
+      if (parsed.libExternos?.includes('${libRoot}') || !parsed.libExternos) {
+        merged.libExternos = resolveLibTemplate(DEFAULT_CONFIG_BASE.libExternos, libRoot);
+      }
+      if (parsed.libErp?.includes('${libRoot}') || !parsed.libErp) {
+        merged.libErp = resolveLibTemplate(DEFAULT_CONFIG_BASE.libErp, libRoot, envVersion);
+      }
+      if (parsed.libAlterdata?.includes('${libRoot}') || !parsed.libAlterdata) {
+        merged.libAlterdata = resolveLibTemplate(DEFAULT_CONFIG_BASE.libAlterdata, libRoot);
+      }
 
       if (!Array.isArray(parsed.dependencyPaths) || parsed.dependencyPaths.length === 0) {
         merged.dependencyPaths = buildDefaultDependencyPaths(merged);

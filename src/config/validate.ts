@@ -43,11 +43,12 @@ export function validateConfigObject(raw: unknown): ValidationIssue[] {
   const config = raw as Partial<Config>;
   const issues: ValidationIssue[] = [];
 
-  const requiredStringFields: Array<keyof Pick<Config, 'repoBase' | 'delphiDir' | 'envVersion' | 'libRoot' | 'libErp' | 'libAlterdata'>> = [
+  const requiredStringFields: Array<keyof Pick<Config, 'repoBase' | 'delphiDir' | 'envVersion' | 'libRoot' | 'libExternos' | 'libErp' | 'libAlterdata'>> = [
     'repoBase',
     'delphiDir',
     'envVersion',
     'libRoot',
+    'libExternos',
     'libErp',
     'libAlterdata',
   ];
@@ -55,6 +56,17 @@ export function validateConfigObject(raw: unknown): ValidationIssue[] {
   for (const field of requiredStringFields) {
     if (!isNonEmptyString(config[field])) {
       issues.push({ field, message: 'deve ser uma string não vazia' });
+    }
+  }
+
+  const optionalStringFields: Array<keyof Pick<Config, 'exeOutputDir' | 'dcuOutputDir'>> = [
+    'exeOutputDir',
+    'dcuOutputDir',
+  ];
+
+  for (const field of optionalStringFields) {
+    if (config[field] !== undefined && !isNonEmptyString(config[field])) {
+      issues.push({ field, message: 'deve ser uma string não vazia se fornecida' });
     }
   }
 

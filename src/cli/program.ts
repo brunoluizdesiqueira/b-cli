@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 
 import { executeBuild } from '../build/execute';
+import { getDcc64Command, getBuiltExecutablePath, printCommands } from '../build/validate-commands';
 import { CONFIG_ENV_VAR, getWritableConfigPath, loadConfig, resolveConfigPath } from '../config/config';
 import { runConfigValidate } from '../config/validate';
 import { runDoctor } from '../diagnostics/doctor';
@@ -206,6 +207,22 @@ export async function runCli(argv: string[]): Promise<void> {
     .action(() => runDoctor(config, resolvedConfigPath)),
     HELP_EXAMPLES.doctor
   );
+
+  program
+    .command('validate-commands')
+    .description('Imprime os comandos que seriam executados (para geração de testes)')
+    .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
+    .option('-p, --project <path>', 'Caminho do projeto')
+    .option('-v, --version <version>', 'Versão a injetar')
+    .action(async (opts) => {
+      const buildType = (opts.type?.toUpperCase() || 'DEBUG') as BuildType;
+      const projectPath = opts.project || Object.values(config.projects)[0];
+      const version = opts.version || '11.3.0';
+      
+      const resolved = await promptBuild(config, buildType, projectPath, version);
+      const projectName = projectPath.split('\\').pop() || projectPath;
+      printCommands(resolved, projectName);
+    });
 
   if (argv.length <= 2) {
     banner();
