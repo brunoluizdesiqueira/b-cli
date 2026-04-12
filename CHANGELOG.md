@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.24
+
+### Patch Changes
+
+- 9c120d4: resolve externos path
+
 ## 1.0.23
 
 ### Patch Changes
