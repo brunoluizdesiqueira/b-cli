@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 1.0.23
+
+### Patch Changes
+
+- 9783eb1: refactor end unit tests
+
 ## 1.0.22
 
 ### Patch Changes
