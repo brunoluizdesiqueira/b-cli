@@ -40,39 +40,31 @@ describe('resolveEnvTemplate', () => {
   });
 });
 
-describe('legacy libRoot migration', () => {
-  it('deve migrar libRoot legado (com External\\3.00) corretamente', () => {
-    const libRoot = 'C:\\Library\\External\\3.00';
+describe('config with new format', () => {
+  it('deve usar novo formato de libRoot corretamente', () => {
+    const libRoot = 'C:\\Library';
     const envVersion = '11.03.00';
     
-    const isLegacyLibRoot = libRoot.endsWith('External\\3.00');
+    const libExternal = resolveLibTemplate('${libRoot}\\External\\3.00', libRoot);
+    const libErp = resolveLibTemplate('${libRoot}\\ERP\\${envVersion}', libRoot, envVersion);
+    const libCompany = resolveLibTemplate('${libRoot}\\CompanyLibrary\\1.0.0', libRoot);
     
-    const newLibRoot = isLegacyLibRoot ? libRoot.replace('\\External\\3.00', '') : libRoot;
-    const libExternal = isLegacyLibRoot ? libRoot : resolveLibTemplate('${libRoot}\\External\\3.00', newLibRoot);
-    const libErp = `${newLibRoot}\\ERP\\${envVersion}`;
-    const libCompany = `${newLibRoot}\\CompanyLibrary\\1.0.0`;
-    
-    assert.strictEqual(newLibRoot, 'C:\\Library');
     assert.strictEqual(libExternal, 'C:\\Library\\External\\3.00');
     assert.strictEqual(libErp, 'C:\\Library\\ERP\\11.03.00');
     assert.strictEqual(libCompany, 'C:\\Library\\CompanyLibrary\\1.0.0');
   });
 
-  it('não deve modificar libRoot novo (sem External\\3.00)', () => {
-    const libRoot = 'C:\\Library';
-    const envVersion = '11.03.00';
+  it('deve funcionar com libRoot customizado', () => {
+    const libRoot = 'D:\\CustomLib';
+    const envVersion = '10.05.00';
     
-    const isLegacyLibRoot = libRoot.endsWith('External\\3.00');
+    const libExternal = resolveLibTemplate('${libRoot}\\External\\3.00', libRoot);
+    const libErp = resolveLibTemplate('${libRoot}\\ERP\\${envVersion}', libRoot, envVersion);
+    const libCompany = resolveLibTemplate('${libRoot}\\CompanyLibrary\\1.0.0', libRoot);
     
-    const newLibRoot = isLegacyLibRoot ? libRoot.replace('\\External\\3.00', '') : libRoot;
-    const libExternal = resolveLibTemplate('${libRoot}\\External\\3.00', newLibRoot);
-    const libErp = resolveLibTemplate('${libRoot}\\ERP\\${envVersion}', newLibRoot, envVersion);
-    const libCompany = resolveLibTemplate('${libRoot}\\CompanyLibrary\\1.0.0', newLibRoot);
-    
-    assert.strictEqual(newLibRoot, 'C:\\Library');
-    assert.strictEqual(libExternal, 'C:\\Library\\External\\3.00');
-    assert.strictEqual(libErp, 'C:\\Library\\ERP\\11.03.00');
-    assert.strictEqual(libCompany, 'C:\\Library\\CompanyLibrary\\1.0.0');
+    assert.strictEqual(libExternal, 'D:\\CustomLib\\External\\3.00');
+    assert.strictEqual(libErp, 'D:\\CustomLib\\ERP\\10.05.00');
+    assert.strictEqual(libCompany, 'D:\\CustomLib\\CompanyLibrary\\1.0.0');
   });
 });
 

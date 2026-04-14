@@ -166,18 +166,9 @@ export function loadConfig(configPath: string): Config {
       const libRoot = merged.libRoot || DEFAULT_CONFIG_BASE.libRoot;
       const envVersion = merged.envVersion || DEFAULT_CONFIG_BASE.envVersion;
 
-      const isLegacyLibRoot = libRoot.endsWith('External\\3.00');
-
-      if (isLegacyLibRoot) {
-        merged.libRoot = libRoot.replace('\\External\\3.00', '');
-        merged.libExternal = libRoot;
-        merged.libErp = `${merged.libRoot}\\ERP\\${envVersion}`;
-        merged.libCompany = `${merged.libRoot}\\CompanyLibrary\\1.0.0`;
-      } else {
-        merged.libExternal = resolveLibTemplate(DEFAULT_CONFIG_BASE.libExternal, libRoot);
-        merged.libErp = resolveLibTemplate(DEFAULT_CONFIG_BASE.libErp, libRoot, envVersion);
-        merged.libCompany = resolveLibTemplate(DEFAULT_CONFIG_BASE.libCompany, libRoot);
-      }
+      merged.libExternal = resolveLibTemplate(DEFAULT_CONFIG_BASE.libExternal, libRoot);
+      merged.libErp = resolveLibTemplate(DEFAULT_CONFIG_BASE.libErp, libRoot, envVersion);
+      merged.libCompany = resolveLibTemplate(DEFAULT_CONFIG_BASE.libCompany, libRoot);
 
       if (!Array.isArray(parsed.dependencyPaths) || parsed.dependencyPaths.length === 0) {
         merged.dependencyPaths = buildDefaultDependencyPaths(merged);
