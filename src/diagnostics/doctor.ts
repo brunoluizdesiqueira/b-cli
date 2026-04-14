@@ -42,9 +42,9 @@ export function runDoctor(config: Config, resolvedConfigPath: string): void {
   checks.push(checkPath('delphiDir', config.delphiDir));
   checks.push(checkPath('Delphi runtime Win64', delphiRuntimePath));
   checks.push(checkPath('libRoot', config.libRoot));
-  checks.push(checkPath('libExternos', config.libExternos));
+  checks.push(checkPath('libExternal', config.libExternal));
   checks.push(checkPath('libErp', config.libErp));
-  checks.push(checkPath('libAlterdata', config.libAlterdata));
+  checks.push(checkPath('libCompany', config.libCompany));
   checks.push(checkFile('cgrc.exe', cgrcPath));
   checks.push(checkFile('dcc64.exe', dcc64Path));
 

@@ -8,9 +8,9 @@ export interface BuildOptions {
   delphiDir: string;
   envVersion: string;
   libRoot: string;
-  libExternos: string;
+  libExternal: string;
   libErp: string;
-  libAlterdata: string;
+  libCompany: string;
   dependencyPaths: string[];
   exeOutputDir: string;
   dcuOutputDir: string;
@@ -21,9 +21,9 @@ export interface Config {
   delphiDir: string;
   envVersion: string;
   libRoot: string;
-  libExternos: string;
+  libExternal: string;
   libErp: string;
-  libAlterdata: string;
+  libCompany: string;
   dependencyPaths: string[];
   projects: Record<string, string>;
   exeOutputDir: string;

@@ -43,14 +43,14 @@ export function validateConfigObject(raw: unknown): ValidationIssue[] {
   const config = raw as Partial<Config>;
   const issues: ValidationIssue[] = [];
 
-  const requiredStringFields: Array<keyof Pick<Config, 'repoBase' | 'delphiDir' | 'envVersion' | 'libRoot' | 'libExternos' | 'libErp' | 'libAlterdata'>> = [
+  const requiredStringFields: Array<keyof Pick<Config, 'repoBase' | 'delphiDir' | 'envVersion' | 'libRoot' | 'libExternal' | 'libErp' | 'libCompany'>> = [
     'repoBase',
     'delphiDir',
     'envVersion',
     'libRoot',
-    'libExternos',
+    'libExternal',
     'libErp',
-    'libAlterdata',
+    'libCompany',
   ];
 
   for (const field of requiredStringFields) {

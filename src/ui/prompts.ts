@@ -54,9 +54,9 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
     delphiDir: config.delphiDir,
     envVersion: config.envVersion,
     libRoot: config.libRoot,
-    libExternos: config.libExternos,
+    libExternal: config.libExternal,
     libErp: config.libErp,
-    libAlterdata: config.libAlterdata,
+    libCompany: config.libCompany,
     dependencyPaths: config.dependencyPaths,
     exeOutputDir: config.exeOutputDir,
     dcuOutputDir: config.dcuOutputDir,
@@ -72,30 +72,30 @@ export async function runConfigInit(config: Config, configPath: string): Promise
     { type: 'input', name: 'repoBase', message: 'Raiz do repositório:', default: config.repoBase },
     { type: 'input', name: 'delphiDir', message: 'Diretório do Delphi:', default: config.delphiDir },
     { type: 'input', name: 'envVersion', message: 'Versão do ambiente (ENV):', default: config.envVersion },
-    { type: 'input', name: 'libRoot', message: 'LibraryDelphiAlexandria root:', default: config.libRoot },
+    { type: 'input', name: 'libRoot', message: 'Library root:', default: config.libRoot },
   ] as any);
 
-  const libRoot = answers.libRoot || 'C:\\LibraryDelphiAlexandria';
-  const libExternosTemplate = answers.libExternos || '${libRoot}\\Externos\\3.00';
+  const libRoot = answers.libRoot || 'C:\\Library';
+  const libExternalTemplate = answers.libExternal || '${libRoot}\\External\\3.00';
   const libErpTemplate = answers.libErp || '${libRoot}\\ERP\\${envVersion}';
-  const libAlterdataTemplate = answers.libAlterdata || '${libRoot}\\LibAlterdata\\1.0.0';
+  const libCompanyTemplate = answers.libCompany || '${libRoot}\\CompanyLibrary\\1.0.0';
   const exeOutputDir = answers.exeOutputDir || 'C:\\Temp\\${envVersion}\\EXE';
   const dcuOutputDir = answers.dcuOutputDir || 'C:\\Temp\\${envVersion}\\DCU';
   const newConfig: Config = {
     ...config,
     ...answers,
     libRoot,
-    libExternos: libExternosTemplate,
+    libExternal: libExternalTemplate,
     libErp: libErpTemplate,
-    libAlterdata: libAlterdataTemplate,
+    libCompany: libCompanyTemplate,
     exeOutputDir,
     dcuOutputDir,
     dependencyPaths: buildDefaultDependencyPaths({
       repoBase: answers.repoBase,
       delphiDir: answers.delphiDir,
-      libExternos: resolveLibTemplate(libExternosTemplate, libRoot),
+      libExternal: resolveLibTemplate(libExternalTemplate, libRoot),
       libErp: resolveLibTemplate(libErpTemplate, libRoot, answers.envVersion),
-      libAlterdata: resolveLibTemplate(libAlterdataTemplate, libRoot),
+      libCompany: resolveLibTemplate(libCompanyTemplate, libRoot),
     }),
   };
 
@@ -111,12 +111,12 @@ export async function runProjectAdd(config: Config, configPath: string): Promise
     {
       type: 'input',
       name: 'projectName',
-      message: 'Nome do projeto (ex: BimerFaturamento):',
+      message: 'Nome do projeto (ex: MyProject):',
     },
     {
       type: 'input',
       name: 'projectPath',
-      message: 'Caminho do projeto (ex: geral\\integrador\\IntegradorXPTO):',
+      message: 'Caminho do projeto (ex: sub_directory\\MySubProject):',
     },
   ] as any);
 

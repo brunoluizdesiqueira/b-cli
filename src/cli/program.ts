@@ -15,33 +15,33 @@ const HELP_EXAMPLES = {
   root: [
     'Exemplos:',
     '  bbuilder',
-    '  bbuilder build --type DEBUG --project faturamento\\BimerFaturamento',
-    '  bbuilder fast --project Bimer',
+    '  bbuilder build --type DEBUG --project sub_directory\\MySubProject',
+    '  bbuilder fast --project MyProject',
     '  bbuilder --config C:\\configs\\bbuilder.config.json doctor',
   ].join('\n'),
   build: [
     'Exemplos:',
     '  bbuilder build',
-    '  bbuilder build --type RELEASE --project Bimer --version 11.3.1',
-    '  bbuilder build --type FAST --project faturamento\\BimerFaturamento',
+    '  bbuilder build --type RELEASE --project MyProject --version 11.3.1',
+    '  bbuilder build --type FAST --project sub_directory\\MySubProject',
   ].join('\n'),
   fast: [
     'Exemplos:',
     '  bbuilder fast',
-    '  bbuilder fast --project Bimer',
-    '  bbuilder fast --project faturamento\\BimerFaturamento --version 11.3.1',
+    '  bbuilder fast --project MyProject',
+    '  bbuilder fast --project sub_directory\\MySubProject --version 11.3.1',
   ].join('\n'),
   debug: [
     'Exemplos:',
     '  bbuilder debug',
-    '  bbuilder debug --project Bimer',
-    '  bbuilder debug --project faturamento\\BimerFaturamento --version 11.3.1',
+    '  bbuilder debug --project MyProject',
+    '  bbuilder debug --project sub_directory\\MySubProject --version 11.3.1',
   ].join('\n'),
   release: [
     'Exemplos:',
     '  bbuilder release',
-    '  bbuilder release --project Bimer',
-    '  bbuilder release --project faturamento\\BimerFaturamento --version 11.3.1',
+    '  bbuilder release --project MyProject',
+    '  bbuilder release --project sub_directory\\MySubProject --version 11.3.1',
   ].join('\n'),
   config: [
     'Exemplos:',
@@ -60,12 +60,12 @@ const HELP_EXAMPLES = {
     '  bbuilder project list',
     '  bbuilder project add',
     '  bbuilder project remove',
-    '  bbuilder project remove --name Bimer',
+    '  bbuilder project remove --name MyProject',
   ].join('\n'),
   projectRemove: [
     'Exemplos:',
     '  bbuilder project remove',
-    '  bbuilder project remove --name Bimer',
+    '  bbuilder project remove --name MyProject',
   ].join('\n'),
   doctor: [
     'Exemplos:',
@@ -93,7 +93,7 @@ export async function runCli(argv: string[]): Promise<void> {
   attachHelpExamples(
     program
     .name('bbuilder')
-    .description('CLI de build local para projetos Delphi do Bimer')
+    .description('CLI de build local para projetos Delphi')
     .version(packageJson.version)
     .option('-c, --config <path>', `Caminho do arquivo de configuração (ou ${CONFIG_ENV_VAR})`),
     HELP_EXAMPLES.root
@@ -104,7 +104,7 @@ export async function runCli(argv: string[]): Promise<void> {
     .command('build')
     .description('Compila um projeto Delphi (interativo se flags omitidas)')
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
-    .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
+    .option('-p, --project <path>', 'Caminho do projeto (ex: sub_directory\\MySubProject)')
     .option('-v, --version <version>', 'Versão a injetar (ex: 11.3.0)'),
     HELP_EXAMPLES.build
   )

@@ -125,7 +125,7 @@ function buildVrcContent(projectName: string, fullVersion: string, parts: [numbe
 
 export function prepareProjectResources(opts: BuildOptions, projectName: string, workspaceDir: string): void {
   const dproj = path.win32.join(workspaceDir, `${projectName}.dproj`);
-  const tempDir = path.join(os.tmpdir(), `BimerBuild_${projectName}`);
+  const tempDir = path.join(os.tmpdir(), `DelphiBuild_${projectName}`);
   const manifestFile = path.join(tempDir, `${projectName}.manifest`);
   const vrcFile = path.join(tempDir, `${projectName}.vrc`);
 
