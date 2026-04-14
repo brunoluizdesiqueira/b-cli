@@ -1,11 +1,9 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-
 import { Config } from '../types';
 
 export const CONFIG_FILENAME = 'bbuilder.config.json';
-export const LEGACY_CONFIG_FILENAME = 'bimer.config.json';
 export const CONFIG_ENV_VAR = 'BBUILDER_CONFIG';
 
 export function resolveLibTemplate(template: string, libRoot: string, envVersion?: string): string {
@@ -126,10 +124,6 @@ export function getDefaultConfigPath(): string {
 }
 
 export function getWritableConfigPath(configPath: string): string {
-  if (path.basename(configPath) === LEGACY_CONFIG_FILENAME) {
-    return path.join(path.dirname(configPath), CONFIG_FILENAME);
-  }
-
   return configPath;
 }
 
@@ -155,11 +149,6 @@ export function resolveConfigPath(argv: string[] = process.argv): string {
   const localConfig = path.join(process.cwd(), CONFIG_FILENAME);
   if (fs.existsSync(localConfig)) {
     return localConfig;
-  }
-
-  const legacyLocalConfig = path.join(process.cwd(), LEGACY_CONFIG_FILENAME);
-  if (fs.existsSync(legacyLocalConfig)) {
-    return legacyLocalConfig;
   }
 
   return getDefaultConfigPath();

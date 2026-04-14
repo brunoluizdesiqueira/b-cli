@@ -39,24 +39,24 @@ Ou use um arquivo manual como este:
 
 ```json
 {
-  "repoBase": "C:\\git\\bimer",
+  "repoBase": "C:\\git\\myProject",
   "delphiDir": "C:\\Program Files (x86)\\Embarcadero\\Studio\\22.0",
   "envVersion": "11.03.00",
-  "libRoot": "C:\\LibraryDelphiAlexandria",
-  "libExternos": "${libRoot}\\Externos\\3.00",
+  "libRoot": "C:\\Library",
+  "libExternal": "${libRoot}\\Extenal\\3.00",
   "libErp": "${libRoot}\\ERP\\${envVersion}",
-  "libAlterdata": "${libRoot}\\LibAlterdata\\1.0.0",
+  "libCompany": "${libRoot}\\CompanyLibrary\\1.0.0",
   "exeOutputDir": "C:\\Temp\\${envVersion}\\EXE",
   "dcuOutputDir": "C:\\Temp\\${envVersion}\\DCU",
   "dependencyPaths": [
-    "C:\\git\\bimer\\dependencies",
+    "C:\\git\\myProject\\dependencies",
     "C:\\Program Files (x86)\\Embarcadero\\Studio\\22.0\\lib\\Win64\\release",
-    "C:\\LibraryDelphiAlexandria\\Externos\\3.00\\sgcWebSockets\\Win64",
-    "C:\\LibraryDelphiAlexandria\\ERP\\11.03.00\\Win64"
+    "C:\\Library\\Extenal\\3.00\\sgcWebSockets\\Win64",
+    "C:\\Library\\ERP\\11.03.00\\Win64"
   ],
   "projects": {
-    "BimerFaturamento": "faturamento\\BimerFaturamento",
-    "Bimer": "Bimer"
+    "MySubProject": "sub_directory\\MySubProject",
+    "MyProject": "MyProject"
   }
 }
 ```
@@ -65,18 +65,18 @@ Ou use um arquivo manual como este:
 
 Os campos de path suportam variáveis que são resolvidas automaticamente:
 
-- `${libRoot}` - caminho base da biblioteca (padrão: `C:\LibraryDelphiAlexandria`)
+- `${libRoot}` - caminho base da biblioteca (padrão: `C:\Library`)
 - `${envVersion}` - versão do ambiente (padrão: `11.03.00`)
 
 Exemplos:
-- `"${libRoot}\\Externos\\3.00"` → `"C:\\LibraryDelphiAlexandria\\Externos\\3.00"`
+- `"${libRoot}\\Extenal\\3.00"` → `"C:\\Library\\Extenal\\3.00"`
 - `"C:\\Temp\\${envVersion}\\EXE"` → `"C:\\Temp\\11.03.00\\EXE"`
 
 Campos que suportam templates:
 - `libRoot` - caminho base da biblioteca
-- `libExternos` - pasta Externos (derivado de libRoot)
+- `libExternal` - pasta Extenal (derivado de libRoot)
 - `libErp` - pasta do ERP (derivado de libRoot e envVersion)
-- `libAlterdata` - pasta LibAlterdata (derivado de libRoot)
+- `libCompany` - pasta CompanyLibrary (derivado de libRoot)
 - `exeOutputDir` - diretório de saída do executável
 - `dcuOutputDir` - diretório de saída das units compiladas
 
@@ -89,8 +89,7 @@ Ordem de prioridade:
 1. `--config <caminho>`
 2. variável de ambiente `BBUILDER_CONFIG`
 3. `bbuilder.config.json` no diretório atual
-4. `bimer.config.json` no diretório atual, por compatibilidade
-5. arquivo global do usuário
+4. arquivo global do usuário
 
 No Windows, o arquivo global padrão fica em:
 
@@ -125,17 +124,17 @@ bbuilder
 Build direto:
 
 ```bash
-bbuilder build --type DEBUG --project BimerFaturamento --version 11.3.1
-bbuilder build --type FAST --project Bimer
-bbuilder build --type RELEASE --project Bimer
+bbuilder build --type DEBUG --project MySubProject --version 11.3.1
+bbuilder build --type FAST --project MyProject
+bbuilder build --type RELEASE --project MyProject
 ```
 
 Atalhos:
 
 ```bash
 bbuilder fast
-bbuilder debug --project Bimer
-bbuilder release --project Bimer --version 11.3.1
+bbuilder debug --project MyProject
+bbuilder release --project MyProject --version 11.3.1
 ```
 
 Projetos:
@@ -144,7 +143,7 @@ Projetos:
 bbuilder project list
 bbuilder project add
 bbuilder project remove
-bbuilder project remove --name Bimer
+bbuilder project remove --name MyProject
 ```
 
 Configuração:
