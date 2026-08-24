@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 2.0.0
+
+### Major Changes
+
+- 7c84809: Resolver templates ${envVersion} e ${libRoot} dentro do dependencyPaths do config. Antes, paths com placeholders eram usados literalmente sem substituição.
+
 ## 1.0.24
 
 ### Patch Changes
