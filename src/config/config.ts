@@ -194,6 +194,10 @@ export function loadConfig(configPath: string): Config {
 
       if (!Array.isArray(parsed.dependencyPaths) || parsed.dependencyPaths.length === 0) {
         merged.dependencyPaths = buildDefaultDependencyPaths(merged);
+      } else {
+        merged.dependencyPaths = merged.dependencyPaths.map(
+          (dep: string) => resolveLibTemplate(dep, libRoot, envVersion),
+        );
       }
 
       return merged;
