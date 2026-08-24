@@ -1,5 +1,11 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 2.0.1
+
+### Patch Changes
+
+- d8c35de: Usar envVersion do config como valor default no prompt de versão do EXE, em vez de valor hardcoded.
+
 ## 2.0.0
 
 ### Major Changes
