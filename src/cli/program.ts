@@ -22,26 +22,26 @@ const HELP_EXAMPLES = {
   build: [
     'Exemplos:',
     '  bbuilder build',
-    '  bbuilder build --type RELEASE --project Bimer --version 11.3.1',
+    '  bbuilder build --type RELEASE --project Bimer --exe-version 11.3.1',
     '  bbuilder build --type FAST --project faturamento\\BimerFaturamento',
   ].join('\n'),
   fast: [
     'Exemplos:',
     '  bbuilder fast',
     '  bbuilder fast --project Bimer',
-    '  bbuilder fast --project faturamento\\BimerFaturamento --version 11.3.1',
+    '  bbuilder fast --project faturamento\\BimerFaturamento --exe-version 11.3.1',
   ].join('\n'),
   debug: [
     'Exemplos:',
     '  bbuilder debug',
     '  bbuilder debug --project Bimer',
-    '  bbuilder debug --project faturamento\\BimerFaturamento --version 11.3.1',
+    '  bbuilder debug --project faturamento\\BimerFaturamento --exe-version 11.3.1',
   ].join('\n'),
   release: [
     'Exemplos:',
     '  bbuilder release',
     '  bbuilder release --project Bimer',
-    '  bbuilder release --project faturamento\\BimerFaturamento --version 11.3.1',
+    '  bbuilder release --project faturamento\\BimerFaturamento --exe-version 11.3.1',
   ].join('\n'),
   config: [
     'Exemplos:',
@@ -105,7 +105,7 @@ export async function runCli(argv: string[]): Promise<void> {
     .description('Compila um projeto Delphi (interativo se flags omitidas)')
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
-    .option('-v, --version <version>', 'Versão a injetar (ex: 11.3.0)'),
+    .option('--exe-version <version>', 'Versão a injetar no EXE (ex: 11.3.0)'),
     HELP_EXAMPLES.build
   )
     .action(async (opts) => {
@@ -114,7 +114,7 @@ export async function runCli(argv: string[]): Promise<void> {
         fatal(`Tipo de build inválido: "${opts.type}". Use FAST, DEBUG ou RELEASE.`);
       }
 
-      const resolved = await promptBuild(config, buildType, opts.project, opts.version);
+      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion);
       await executeBuild(resolved);
     });
 
@@ -123,9 +123,9 @@ export async function runCli(argv: string[]): Promise<void> {
       .command(type)
       .description(`Compila no modo ${type.toUpperCase()} (interativo para projeto/versão)`)
       .option('-p, --project <path>', 'Caminho do projeto')
-      .option('-v, --version <version>', 'Versão a injetar')
+      .option('--exe-version <version>', 'Versão a injetar no EXE')
       .action(async (opts) => {
-        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.version);
+        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion);
         await executeBuild(resolved);
       });
 
@@ -213,11 +213,11 @@ export async function runCli(argv: string[]): Promise<void> {
     .description('Imprime os comandos que seriam executados (para geração de testes)')
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto')
-    .option('-v, --version <version>', 'Versão a injetar')
+    .option('--exe-version <version>', 'Versão a injetar no EXE')
     .action(async (opts) => {
       const buildType = (opts.type?.toUpperCase() || 'DEBUG') as BuildType;
       const projectPath = opts.project || Object.values(config.projects)[0];
-      const version = opts.version || '11.3.0';
+      const version = opts.exeVersion || config.envVersion;
       
       const resolved = await promptBuild(config, buildType, projectPath, version);
       const projectName = projectPath.split('\\').pop() || projectPath;
