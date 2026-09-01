@@ -59,7 +59,7 @@ function generateDcc64Command(opts: BuildOptions, projectName: string): { exe: s
   const exeOut = resolveEnvTemplate(opts.exeOutputDir, opts.envVersion);
   const dcuOut = resolveEnvTemplate(opts.dcuOutputDir, opts.envVersion);
 
-  const nsValue = 'Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap.Web;Soap;Winapi;FireDAC.VCLUI;System.Win;';
+  const nsValue = 'Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;FireDAC.VCLUI;System.Win;';
   const aliasValue = 'Generics.Collections=System.Generics.Collections;Generics.Defaults=System.Generics.Defaults;WinTypes=Winapi.Windows;WinProcs=Winapi.Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE';
   const dcc64 = win32Join(opts.delphiDir, 'bin', 'dcc64.exe');
   

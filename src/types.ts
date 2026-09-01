@@ -14,6 +14,8 @@ export interface BuildOptions {
   dependencyPaths: string[];
   exeOutputDir: string;
   dcuOutputDir: string;
+  /** Quando true, não suprime hints/warnings do compilador (remove -H- e -W-). */
+  showWarnings?: boolean;
 }
 
 export interface Config {

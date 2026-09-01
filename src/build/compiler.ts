@@ -1,49 +1,17 @@
 import execa from 'execa';
+import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { BuildOptions, BuildType } from '../types';
+import { BuildOptions } from '../types';
 import { fatal, step } from '../ui/output';
+import { buildCompilerFlags, getDcc64Command, resolveEnvTemplate } from './dcc64-args';
+import { formatDiagnosticsReport, parseDcc64Diagnostics } from './diagnostics';
 
-function resolveEnvTemplate(template: string, envVersion: string): string {
-  return template.replace(/\$\{envVersion\}/g, envVersion).replace(/\$envVersion/g, envVersion);
-}
+export { buildCompilerFlags };
 
 const delphiEnvCache = new Map<string, NodeJS.ProcessEnv>();
-
-export function buildCompilerFlags(buildType: BuildType): { flags: string[]; defines: string; runAfter: boolean } {
-  const baseDefines = 'DEBUG;ALT_CEF133_0;EUREKALOG';
-  const releaseDefines = 'RELEASE;ALT_CEF133_0;EUREKALOG';
-
-  switch (buildType) {
-    case 'FAST':
-      return {
-        flags: ['-$W+', '-$J+', '-$D+', '-$L+', '-$Y+', '-$O-'],
-        defines: baseDefines,
-        runAfter: true,
-      };
-    case 'DEBUG':
-      return {
-        flags: ['-B', '-$W+', '-$J+', '-$D+', '-$L+', '-$Y+', '-$O-', '-V', '-VR'],
-        defines: baseDefines,
-        runAfter: true,
-      };
-    case 'RELEASE':
-      return {
-        flags: ['-B', '-$W+', '-$J+', '-$D0', '-$L-', '-$Y-', '-$O+'],
-        defines: releaseDefines,
-        runAfter: false,
-      };
-  }
-}
-
-function buildDependencies(opts: BuildOptions): string {
-  // execa passes each compiler switch as a single argv entry, so we should
-  // not embed quotes inside the semicolon-separated list. Doing that can make
-  // dcc64 fail to resolve paths such as the Delphi runtime library.
-  return opts.dependencyPaths.join(';');
-}
 
 function parseWindowsEnv(output: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
@@ -121,49 +89,48 @@ export async function runCgrc(opts: BuildOptions, projectName: string): Promise<
 }
 
 export async function runDcc64(opts: BuildOptions, projectName: string, workspaceDir: string): Promise<void> {
-  const { flags, defines } = buildCompilerFlags(opts.type);
-  const deps = buildDependencies(opts);
-  const exeOut = resolveEnvTemplate(opts.exeOutputDir, opts.envVersion);
-  const dcuOut = resolveEnvTemplate(opts.dcuOutputDir, opts.envVersion);
+  const { exe, args, exeOutputDir, dcuOutputDir } = getDcc64Command(opts, projectName);
   const delphiEnv = await getDelphiEnvironment(opts.delphiDir);
 
-  if (!fs.existsSync(exeOut)) fs.mkdirSync(exeOut, { recursive: true });
-  if (!fs.existsSync(dcuOut)) fs.mkdirSync(dcuOut, { recursive: true });
+  if (!fs.existsSync(exeOutputDir)) fs.mkdirSync(exeOutputDir, { recursive: true });
+  if (!fs.existsSync(dcuOutputDir)) fs.mkdirSync(dcuOutputDir, { recursive: true });
 
-  const nsValue = 'Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;FireDAC.VCLUI;System.Win;';
-  const aliasValue = 'Generics.Collections=System.Generics.Collections;Generics.Defaults=System.Generics.Defaults;WinTypes=Winapi.Windows;WinProcs=Winapi.Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE';
-  const dcc64 = path.win32.join(opts.delphiDir, 'bin', 'dcc64.exe');
-  const args = [
-    ...flags,
-    '--no-config', '-Q', '-H-', '-W-',
-    '-TX.exe',
-    `-A${aliasValue}`,
-    `-D${defines}`,
-    `-E${exeOut}`,
-    `-I${deps}`,
-    `-LE${exeOut}`,
-    `-LN${exeOut}`,
-    `-NU${dcuOut}`,
-    `-NS${nsValue}`,
-    `-O${deps}`,
-    `-R${deps}`,
-    `-U${deps}`,
-    '-K00400000', '-GD',
-    `-NB${exeOut}`,
-    `-NH${exeOut}`,
-    `-NO${dcuOut}`,
-    '-W-', '-W-SYMBOL_PLATFORM', '-W-UNIT_PLATFORM', '-W-DUPLICATE_CTOR_DTOR', '-W-IMPLICIT_STRING_CAST',
-    `${projectName}.dpr`,
-  ];
+  // Captura a saída do compilador em buffer E transmite ao terminal em tempo
+  // real (tee), preservando a experiência de acompanhar a compilação ao vivo
+  // e permitindo, ao final, parsear os diagnósticos (erros/warnings/hints).
+  let captured = '';
+  const subprocess = execa(exe, args, {
+    cwd: workspaceDir,
+    env: delphiEnv,
+    all: true,
+    buffer: false,
+  });
+
+  if (subprocess.all) {
+    subprocess.all.on('data', (chunk: Buffer) => {
+      const text = chunk.toString();
+      captured += text;
+      process.stdout.write(text);
+    });
+  }
 
   try {
-    await execa(dcc64, args, {
-      cwd: workspaceDir,
-      env: delphiEnv,
-      stdio: 'inherit',
-    });
+    await subprocess;
   } catch {
-    fatal('Falha na compilação do Delphi. Verifique os logs de erro acima.');
+    printDiagnosticsSummary(captured);
+    fatal('Falha na compilação do Delphi. Verifique os diagnósticos acima.');
+    return;
+  }
+
+  printDiagnosticsSummary(captured);
+}
+
+function printDiagnosticsSummary(output: string): void {
+  const diagnostics = parseDcc64Diagnostics(output);
+  const report = formatDiagnosticsReport(diagnostics);
+  if (report) {
+    console.log('');
+    console.log(report);
   }
 }
 
@@ -174,5 +141,17 @@ export function runBuiltExecutable(opts: BuildOptions, projectName: string): voi
 
   const exeOut = path.win32.join(resolveEnvTemplate(opts.exeOutputDir, opts.envVersion), `${projectName}.exe`);
   step(`Iniciando ${projectName}.exe...`);
-  execa(exeOut, [], { detached: true, stdio: 'ignore' }).unref();
+
+  // Fire-and-forget real: usamos child_process.spawn nativo (não execa) para
+  // NÃO criar uma promise pendente que mantenha o event loop do bbuilder vivo.
+  // Com detached + stdio ignorado + unref(), o EXE roda totalmente independente
+  // do terminal — assim o console é liberado imediatamente e não fica preso
+  // enquanto o app (ou uma sessão de debug anexada a ele) está aberto.
+  const child = spawn(exeOut, [], {
+    detached: true,
+    stdio: 'ignore',
+    cwd: path.win32.dirname(exeOut),
+  });
+  child.on('error', () => undefined);
+  child.unref();
 }
