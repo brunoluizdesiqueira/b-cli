@@ -7,6 +7,7 @@ import * as path from 'path';
 import { BuildOptions } from '../types';
 import { fatal, step } from '../ui/output';
 import { buildCompilerFlags, getDcc64Command, resolveEnvTemplate } from './dcc64-args';
+import { formatDiagnosticsReport, parseDcc64Diagnostics } from './diagnostics';
 
 export { buildCompilerFlags };
 
@@ -94,14 +95,42 @@ export async function runDcc64(opts: BuildOptions, projectName: string, workspac
   if (!fs.existsSync(exeOutputDir)) fs.mkdirSync(exeOutputDir, { recursive: true });
   if (!fs.existsSync(dcuOutputDir)) fs.mkdirSync(dcuOutputDir, { recursive: true });
 
-  try {
-    await execa(exe, args, {
-      cwd: workspaceDir,
-      env: delphiEnv,
-      stdio: 'inherit',
+  // Captura a saída do compilador em buffer E transmite ao terminal em tempo
+  // real (tee), preservando a experiência de acompanhar a compilação ao vivo
+  // e permitindo, ao final, parsear os diagnósticos (erros/warnings/hints).
+  let captured = '';
+  const subprocess = execa(exe, args, {
+    cwd: workspaceDir,
+    env: delphiEnv,
+    all: true,
+    buffer: false,
+  });
+
+  if (subprocess.all) {
+    subprocess.all.on('data', (chunk: Buffer) => {
+      const text = chunk.toString();
+      captured += text;
+      process.stdout.write(text);
     });
+  }
+
+  try {
+    await subprocess;
   } catch {
-    fatal('Falha na compilação do Delphi. Verifique os logs de erro acima.');
+    printDiagnosticsSummary(captured);
+    fatal('Falha na compilação do Delphi. Verifique os diagnósticos acima.');
+    return;
+  }
+
+  printDiagnosticsSummary(captured);
+}
+
+function printDiagnosticsSummary(output: string): void {
+  const diagnostics = parseDcc64Diagnostics(output);
+  const report = formatDiagnosticsReport(diagnostics);
+  if (report) {
+    console.log('');
+    console.log(report);
   }
 }
 
