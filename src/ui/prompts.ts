@@ -4,7 +4,7 @@ import inquirer from 'inquirer';
 import { buildDefaultDependencyPaths, resolveLibTemplate, saveConfig } from '../config/config';
 import { BuildOptions, BuildType, Config } from '../types';
 
-export async function promptBuild(config: Config, cliType?: string, cliProject?: string, cliVersion?: string): Promise<BuildOptions> {
+export async function promptBuild(config: Config, cliType?: string, cliProject?: string, cliVersion?: string, showWarnings?: boolean): Promise<BuildOptions> {
   const questions: inquirer.QuestionCollection[] = [];
   const projectChoices = Object.entries(config.projects).map(([name, projectPath]) => ({
     name,
@@ -60,6 +60,7 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
     dependencyPaths: config.dependencyPaths,
     exeOutputDir: config.exeOutputDir,
     dcuOutputDir: config.dcuOutputDir,
+    showWarnings: showWarnings ?? false,
   };
 }
 

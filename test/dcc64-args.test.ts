@@ -233,3 +233,40 @@ describe('modo DEBUG - diretivas de compilação de debug do EXE', () => {
     assert.ok(!release.includes('-VR'));
   });
 });
+
+
+describe('flag showWarnings - supressão de hints/warnings', () => {
+  it('DEFAULT (sem showWarnings): deve suprimir hints (-H-) e warnings (-W-)', () => {
+    const { args } = getDcc64Command(makeOpts('FAST'), 'BimerFaturamento');
+    assert.ok(args.includes('-H-'), 'default deve conter -H-');
+    assert.ok(args.includes('-W-'), 'default deve conter -W-');
+  });
+
+  it('showWarnings=true: NÃO deve conter -H- nem o supressor global -W-', () => {
+    const opts = { ...makeOpts('FAST'), showWarnings: true };
+    const { args } = getDcc64Command(opts, 'BimerFaturamento');
+    assert.ok(!args.includes('-H-'), 'não deve suprimir hints');
+    assert.ok(!args.includes('-W-'), 'não deve suprimir warnings globalmente');
+  });
+
+  it('showWarnings=true: deve MANTER os supressores específicos de ruído de plataforma', () => {
+    const opts = { ...makeOpts('FAST'), showWarnings: true };
+    const { args } = getDcc64Command(opts, 'BimerFaturamento');
+    assert.ok(args.includes('-W-SYMBOL_PLATFORM'));
+    assert.ok(args.includes('-W-UNIT_PLATFORM'));
+    assert.ok(args.includes('-W-DUPLICATE_CTOR_DTOR'));
+    assert.ok(args.includes('-W-IMPLICIT_STRING_CAST'));
+  });
+
+  it('showWarnings=false explícito deve igualar o comportamento default', () => {
+    const withFalse = getDcc64Command({ ...makeOpts('DEBUG'), showWarnings: false }, 'P').args;
+    const withUndef = getDcc64Command(makeOpts('DEBUG'), 'P').args;
+    assert.deepStrictEqual(withFalse, withUndef);
+  });
+
+  it('o .dpr do projeto continua sendo o último argumento com showWarnings', () => {
+    const opts = { ...makeOpts('RELEASE'), showWarnings: true };
+    const { args } = getDcc64Command(opts, 'BimerFaturamento');
+    assert.strictEqual(args[args.length - 1], 'BimerFaturamento.dpr');
+  });
+});

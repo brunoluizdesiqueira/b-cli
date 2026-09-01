@@ -90,9 +90,17 @@ export function getDcc64Command(opts: BuildOptions, projectName: string): Dcc64C
   const dcuOut = resolveEnvTemplate(opts.dcuOutputDir, opts.envVersion);
   const dcc64 = path.win32.join(opts.delphiDir, 'bin', 'dcc64.exe');
 
+  // Por padrão o build suprime hints (-H-) e warnings (-W-) para manter a saída
+  // limpa. Com showWarnings, esses supressores globais são omitidos para que o
+  // compilador emita hints/warnings e o parser de diagnósticos possa reportá-los.
+  // Os supressores específicos (-W-SYMBOL_PLATFORM etc.) são mantidos por serem
+  // ruído de plataforma conhecido, mesmo quando warnings estão habilitados.
+  const suppressGlobal = opts.showWarnings ? [] : ['-H-', '-W-'];
+  const suppressTrailing = opts.showWarnings ? [] : ['-W-'];
+
   const args = [
     ...flags,
-    '--no-config', '-Q', '-H-', '-W-',
+    '--no-config', '-Q', ...suppressGlobal,
     '-TX.exe',
     `-A${DCC64_ALIAS_VALUE}`,
     `-D${defines}`,
@@ -109,7 +117,7 @@ export function getDcc64Command(opts: BuildOptions, projectName: string): Dcc64C
     `-NB${exeOut}`,
     `-NH${exeOut}`,
     `-NO${dcuOut}`,
-    '-W-', '-W-SYMBOL_PLATFORM', '-W-UNIT_PLATFORM', '-W-DUPLICATE_CTOR_DTOR', '-W-IMPLICIT_STRING_CAST',
+    ...suppressTrailing, '-W-SYMBOL_PLATFORM', '-W-UNIT_PLATFORM', '-W-DUPLICATE_CTOR_DTOR', '-W-IMPLICIT_STRING_CAST',
     `${projectName}.dpr`,
   ];
 

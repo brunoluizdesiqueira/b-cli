@@ -105,7 +105,8 @@ export async function runCli(argv: string[]): Promise<void> {
     .description('Compila um projeto Delphi (interativo se flags omitidas)')
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
-    .option('--exe-version <version>', 'Versão a injetar no EXE (ex: 11.3.0)'),
+    .option('--exe-version <version>', 'Versão a injetar no EXE (ex: 11.3.0)')
+    .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)'),
     HELP_EXAMPLES.build
   )
     .action(async (opts) => {
@@ -114,7 +115,7 @@ export async function runCli(argv: string[]): Promise<void> {
         fatal(`Tipo de build inválido: "${opts.type}". Use FAST, DEBUG ou RELEASE.`);
       }
 
-      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion);
+      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion, opts.showWarnings);
       await executeBuild(resolved);
     });
 
@@ -124,8 +125,9 @@ export async function runCli(argv: string[]): Promise<void> {
       .description(`Compila no modo ${type.toUpperCase()} (interativo para projeto/versão)`)
       .option('-p, --project <path>', 'Caminho do projeto')
       .option('--exe-version <version>', 'Versão a injetar no EXE')
+      .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)')
       .action(async (opts) => {
-        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion);
+        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion, opts.showWarnings);
         await executeBuild(resolved);
       });
 
@@ -214,12 +216,13 @@ export async function runCli(argv: string[]): Promise<void> {
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto')
     .option('--exe-version <version>', 'Versão a injetar no EXE')
+    .option('--show-warnings', 'Não suprime hints/warnings do compilador')
     .action(async (opts) => {
       const buildType = (opts.type?.toUpperCase() || 'DEBUG') as BuildType;
       const projectPath = opts.project || Object.values(config.projects)[0];
       const version = opts.exeVersion || config.envVersion;
       
-      const resolved = await promptBuild(config, buildType, projectPath, version);
+      const resolved = await promptBuild(config, buildType, projectPath, version, opts.showWarnings);
       const projectName = projectPath.split('\\').pop() || projectPath;
       printCommands(resolved, projectName);
     });
