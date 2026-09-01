@@ -1,5 +1,20 @@
 # @brunoluizdesiqueira/bbuilder-cli
 
+## 2.1.0
+
+### Minor Changes
+
+- 182795d: Adicionar parser de diagnósticos do compilador dcc64. A saída do compilador agora é capturada (com streaming ao vivo preservado no terminal via tee) e, ao final do build, é apresentado um resumo estruturado de erros, warnings e hints — cada um com arquivo, linha, código (ex: `E2003`) e mensagem. Erros/fatais são destacados. Quando não há diagnósticos, nada extra é impresso. Em caso de falha, o resumo é exibido antes de encerrar, substituindo a antiga mensagem genérica "verifique os logs acima".
+- 47c0224: Adicionar a flag `--show-warnings` aos comandos de build (`build`, `fast`, `debug`, `release`, `validate-commands`). Por padrão o compilador suprime hints e warnings (`-H- -W-`) para manter a saída limpa; com `--show-warnings` esses supressores globais são omitidos, fazendo o dcc64 emitir hints/warnings que o parser de diagnósticos passa a reportar no resumo (com arquivo, linha e código). Os supressores específicos de ruído de plataforma (`-W-SYMBOL_PLATFORM`, `-W-UNIT_PLATFORM`, etc.) são mantidos mesmo com a flag ativa.
+
+### Patch Changes
+
+- eb2f537: Unificar a geração dos comandos do compilador dcc64 em uma fonte única (`src/build/dcc64-args.ts`), consumida tanto pelo executor de build (`compiler.ts`) quanto pelo inspetor de comandos (`validate-commands.ts`). Elimina a duplicação que permitia divergência silenciosa entre "o que é inspecionado" e "o que é executado". As diretivas de compilação (incluindo as de DEBUG: `-$D+ -$L+ -$Y+ -$O- -V -VR`) permanecem idênticas, com testes que travam cada uma.
+
+  Corrigir o terminal que ficava preso após o build FAST/DEBUG: a execução pós-build do EXE agora usa `child_process.spawn` desanexado (em vez de `execa`), liberando o console imediatamente sem esperar o EXE (ou a sessão de debug anexada a ele) ser encerrado.
+
+- 0304594: Renomear a flag de versão do EXE de `--version` para `--exe-version` em todos os comandos de build (build, fast, debug, release, validate-commands). A flag `--version` conflitava com a flag interna do Commander e não funcionava via linha de comando. O default agora usa o envVersion do config.
+
 ## 2.0.1
 
 ### Patch Changes
