@@ -33,7 +33,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
-    "test": "node --test test/**/*.test.ts",
+    "test": "node --require ts-node/register --test test/**/*.test.ts",
     "prepack": "npm run build",
     "changeset": "changeset",
     "version-packages": "changeset version",
