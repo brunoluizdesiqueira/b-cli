@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 
 import { executeBuild } from '../build/execute';
+import { resolveProject } from '../build/project';
 import { getDcc64Command, getBuiltExecutablePath, printCommands } from '../build/validate-commands';
 import { CONFIG_ENV_VAR, getWritableConfigPath, loadConfig, resolveConfigPath } from '../config/config';
 import { runConfigValidate } from '../config/validate';
@@ -106,7 +107,8 @@ export async function runCli(argv: string[]): Promise<void> {
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
     .option('--exe-version <version>', 'Versão a injetar no EXE (ex: 11.3.0)')
-    .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)'),
+    .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)')
+    .option('--attach', 'Inicia o EXE anexado ao terminal (exibe logs/stacktrace; ocupa o terminal até encerrar). Só afeta FAST/DEBUG'),
     HELP_EXAMPLES.build
   )
     .action(async (opts) => {
@@ -115,7 +117,7 @@ export async function runCli(argv: string[]): Promise<void> {
         fatal(`Tipo de build inválido: "${opts.type}". Use FAST, DEBUG ou RELEASE.`);
       }
 
-      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion, opts.showWarnings);
+      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion, opts.showWarnings, opts.attach);
       await executeBuild(resolved);
     });
 
@@ -126,8 +128,9 @@ export async function runCli(argv: string[]): Promise<void> {
       .option('-p, --project <path>', 'Caminho do projeto')
       .option('--exe-version <version>', 'Versão a injetar no EXE')
       .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)')
+      .option('--attach', 'Inicia o EXE anexado ao terminal (exibe logs/stacktrace; ocupa o terminal até encerrar). Só afeta FAST/DEBUG')
       .action(async (opts) => {
-        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion, opts.showWarnings);
+        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion, opts.showWarnings, opts.attach);
         await executeBuild(resolved);
       });
 
@@ -223,7 +226,11 @@ export async function runCli(argv: string[]): Promise<void> {
       const version = opts.exeVersion || config.envVersion;
       
       const resolved = await promptBuild(config, buildType, projectPath, version, opts.showWarnings);
-      const projectName = projectPath.split('\\').pop() || projectPath;
+      // Deriva o projectName da MESMA fonte que o build real (resolveProject
+      // sobre o caminho já resolvido em promptBuild), garantindo que os
+      // comandos inspecionados sejam idênticos aos executados mesmo quando a
+      // chave do projeto difere do basename do caminho.
+      const { projectName } = resolveProject(resolved.project, config.repoBase);
       printCommands(resolved, projectName);
     });
 

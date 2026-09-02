@@ -1,5 +1,5 @@
 import execa from 'execa';
-import { spawn } from 'child_process';
+import { spawn, SpawnOptions } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -8,6 +8,7 @@ import { BuildOptions } from '../types';
 import { fatal, step } from '../ui/output';
 import { buildCompilerFlags, getDcc64Command, resolveEnvTemplate } from './dcc64-args';
 import { formatDiagnosticsReport, parseDcc64Diagnostics } from './diagnostics';
+import { buildAttachReport } from './stacktrace-report';
 
 export { buildCompilerFlags };
 
@@ -134,24 +135,89 @@ function printDiagnosticsSummary(output: string): void {
   }
 }
 
-export function runBuiltExecutable(opts: BuildOptions, projectName: string): void {
+export async function runBuiltExecutable(opts: BuildOptions, projectName: string): Promise<void> {
   const { runAfter } = buildCompilerFlags(opts.type);
 
   if (!runAfter) return;
 
   const exeOut = path.win32.join(resolveEnvTemplate(opts.exeOutputDir, opts.envVersion), `${projectName}.exe`);
-  step(`Iniciando ${projectName}.exe...`);
+
+  if (opts.attach) {
+    step(`Iniciando ${projectName}.exe anexado ao terminal (Ctrl+C para encerrar)...`);
+  } else {
+    step(`Iniciando ${projectName}.exe...`);
+  }
+
+  const { spawnOptions, waitForExit } = getRunExecutableSpawnOptions(opts, exeOut);
+  const appStart = new Date();
+  const child = spawn(exeOut, [], spawnOptions);
+
+  if (waitForExit) {
+    // Modo attach: mantém o processo do bbuilder vivo aguardando o app encerrar,
+    // propagando stdout/stderr (incluindo stacktrace) ao terminal via 'inherit'.
+    await new Promise<void>((resolve) => {
+      child.on('exit', (code) => {
+        step(`${projectName}.exe encerrado (código ${code ?? 0}).`);
+        resolve();
+      });
+      child.on('error', (err) => {
+        // Ex.: EXE inexistente. Informa o usuário em vez de falhar em silêncio.
+        step(`Não foi possível iniciar ${projectName}.exe: ${err.message}`);
+        resolve();
+      });
+    });
+
+    // Após o encerramento, se um diretório de relatórios estiver configurado,
+    // procura e imprime o relatório de crash mais recente gerado nesta execução.
+    // Genérico: só age se stacktraceReportDir estiver definido na config.
+    try {
+      const report = buildAttachReport(opts.stacktraceReportDir, opts.envVersion, appStart);
+      if (report) {
+        console.log(report);
+      }
+    } catch {
+      // Impressão do relatório é best-effort; nunca deve derrubar o build.
+    }
+    return;
+  }
 
   // Fire-and-forget real: usamos child_process.spawn nativo (não execa) para
   // NÃO criar uma promise pendente que mantenha o event loop do bbuilder vivo.
   // Com detached + stdio ignorado + unref(), o EXE roda totalmente independente
   // do terminal — assim o console é liberado imediatamente e não fica preso
   // enquanto o app (ou uma sessão de debug anexada a ele) está aberto.
-  const child = spawn(exeOut, [], {
-    detached: true,
-    stdio: 'ignore',
-    cwd: path.win32.dirname(exeOut),
-  });
+  // Handler de 'error' evita que uma falha de spawn (ex.: EXE inexistente)
+  // vire um erro não tratado que derrubaria o processo do bbuilder.
   child.on('error', () => undefined);
   child.unref();
+}
+
+/**
+ * Decide como o executável gerado deve ser iniciado.
+ *
+ * - Modo padrão (attach=false): desanexado, saída ignorada, terminal liberado
+ *   imediatamente. Nenhum stacktrace/log do app chega ao console.
+ * - Modo attach=true: anexado ao terminal com stdio 'inherit', de forma que
+ *   logs e stacktrace do app apareçam no console. O bbuilder aguarda o app
+ *   encerrar (waitForExit=true).
+ *
+ * Função pura (não faz spawn) para permitir teste unitário do comportamento.
+ */
+export function getRunExecutableSpawnOptions(
+  opts: Pick<BuildOptions, 'attach'>,
+  exeOut: string,
+): { spawnOptions: SpawnOptions; waitForExit: boolean } {
+  const cwd = path.win32.dirname(exeOut);
+
+  if (opts.attach) {
+    return {
+      spawnOptions: { detached: false, stdio: 'inherit', cwd },
+      waitForExit: true,
+    };
+  }
+
+  return {
+    spawnOptions: { detached: true, stdio: 'ignore', cwd },
+    waitForExit: false,
+  };
 }

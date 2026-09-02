@@ -44,6 +44,6 @@ export async function executeBuild(opts: BuildOptions): Promise<void> {
 
   const { runAfter } = buildCompilerFlags(opts.type);
   if (runAfter) {
-    runBuiltExecutable(opts, projectName);
+    await runBuiltExecutable(opts, projectName);
   }
 }

@@ -48,6 +48,7 @@ Ou use um arquivo manual como este:
   "libAlterdata": "${libRoot}\\LibAlterdata\\1.0.0",
   "exeOutputDir": "C:\\Temp\\${envVersion}\\EXE",
   "dcuOutputDir": "C:\\Temp\\${envVersion}\\DCU",
+  "stacktraceReportDir": "${userProfile}\\EurekaLog",
   "dependencyPaths": [
     "C:\\git\\bimer\\dependencies",
     "C:\\Program Files (x86)\\Embarcadero\\Studio\\22.0\\lib\\Win64\\release",
@@ -79,8 +80,11 @@ Campos que suportam templates:
 - `libAlterdata` - pasta LibAlterdata (derivado de libRoot)
 - `exeOutputDir` - diretório de saída do executável
 - `dcuOutputDir` - diretório de saída das units compiladas
+- `stacktraceReportDir` - diretório onde a aplicação grava relatórios de crash (ex.: bug reports `.el` do EurekaLog); suporta `${userProfile}` e `${envVersion}`
 
 `dependencyPaths` varia por máquina e deve ser ajustado por usuário.
+
+`stacktraceReportDir` é opcional. Quando definido e usado com `--attach`, o CLI imprime no terminal o stacktrace do relatório de crash mais recente gerado após o início do app. Se ausente, o recurso de impressão de stacktrace fica desabilitado.
 
 ## Resolução da Configuração
 
@@ -125,9 +129,16 @@ bbuilder
 Build direto:
 
 ```bash
-bbuilder build --type DEBUG --project BimerFaturamento --version 11.3.1
+bbuilder build --type DEBUG --project BimerFaturamento --exe-version 11.3.1
 bbuilder build --type FAST --project Bimer
 bbuilder build --type RELEASE --project Bimer
+```
+
+O `--project` aceita tanto o nome configurado (chave em `projects`) quanto o caminho relativo:
+
+```bash
+bbuilder build --type FAST --project BimerFaturamento
+bbuilder build --type FAST --project faturamento\BimerFaturamento
 ```
 
 Atalhos:
@@ -135,8 +146,25 @@ Atalhos:
 ```bash
 bbuilder fast
 bbuilder debug --project Bimer
-bbuilder release --project Bimer --version 11.3.1
+bbuilder release --project Bimer --exe-version 11.3.1
 ```
+
+### Modo attach (ver logs e stacktrace no terminal)
+
+Por padrão, nos modos `FAST` e `DEBUG` o CLI inicia o EXE de forma desanexada e libera o terminal imediatamente. Com `--attach`, o EXE é iniciado anexado ao terminal:
+
+```bash
+bbuilder build --type DEBUG --project BimerFaturamento --attach
+bbuilder debug --project BimerFaturamento --attach
+```
+
+No modo attach:
+
+- os logs do app (stdout/stderr) aparecem no terminal em tempo real;
+- o CLI aguarda o app encerrar (o terminal fica ocupado até você fechar o app);
+- após o encerramento, se `stacktraceReportDir` estiver configurado, o CLI localiza o relatório de crash mais recente gerado nessa execução e imprime o stacktrace formatado (exceção + pilha de chamadas, destacando os frames da aplicação).
+
+O `--attach` só tem efeito em `FAST`/`DEBUG` (que executam o app após o build). `RELEASE` não executa o app.
 
 Projetos:
 
