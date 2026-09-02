@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 
 import { executeBuild } from '../build/execute';
+import { resolveProject } from '../build/project';
 import { getDcc64Command, getBuiltExecutablePath, printCommands } from '../build/validate-commands';
 import { CONFIG_ENV_VAR, getWritableConfigPath, loadConfig, resolveConfigPath } from '../config/config';
 import { runConfigValidate } from '../config/validate';
@@ -225,7 +226,11 @@ export async function runCli(argv: string[]): Promise<void> {
       const version = opts.exeVersion || config.envVersion;
       
       const resolved = await promptBuild(config, buildType, projectPath, version, opts.showWarnings);
-      const projectName = projectPath.split('\\').pop() || projectPath;
+      // Deriva o projectName da MESMA fonte que o build real (resolveProject
+      // sobre o caminho já resolvido em promptBuild), garantindo que os
+      // comandos inspecionados sejam idênticos aos executados mesmo quando a
+      // chave do projeto difere do basename do caminho.
+      const { projectName } = resolveProject(resolved.project, config.repoBase);
       printCommands(resolved, projectName);
     });
 

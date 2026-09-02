@@ -151,7 +151,6 @@ export async function runBuiltExecutable(opts: BuildOptions, projectName: string
   const { spawnOptions, waitForExit } = getRunExecutableSpawnOptions(opts, exeOut);
   const appStart = new Date();
   const child = spawn(exeOut, [], spawnOptions);
-  child.on('error', () => undefined);
 
   if (waitForExit) {
     // Modo attach: mantém o processo do bbuilder vivo aguardando o app encerrar,
@@ -161,7 +160,11 @@ export async function runBuiltExecutable(opts: BuildOptions, projectName: string
         step(`${projectName}.exe encerrado (código ${code ?? 0}).`);
         resolve();
       });
-      child.on('error', () => resolve());
+      child.on('error', (err) => {
+        // Ex.: EXE inexistente. Informa o usuário em vez de falhar em silêncio.
+        step(`Não foi possível iniciar ${projectName}.exe: ${err.message}`);
+        resolve();
+      });
     });
 
     // Após o encerramento, se um diretório de relatórios estiver configurado,
@@ -183,6 +186,9 @@ export async function runBuiltExecutable(opts: BuildOptions, projectName: string
   // Com detached + stdio ignorado + unref(), o EXE roda totalmente independente
   // do terminal — assim o console é liberado imediatamente e não fica preso
   // enquanto o app (ou uma sessão de debug anexada a ele) está aberto.
+  // Handler de 'error' evita que uma falha de spawn (ex.: EXE inexistente)
+  // vire um erro não tratado que derrubaria o processo do bbuilder.
+  child.on('error', () => undefined);
   child.unref();
 }
 
