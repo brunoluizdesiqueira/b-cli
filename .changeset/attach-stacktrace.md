@@ -9,3 +9,5 @@ Inclui o novo campo de configuração opcional `stacktraceReportDir` (suporta os
 Correções relacionadas:
 - `--project` passa a aceitar tanto o nome configurado (chave em `projects`) quanto o caminho relativo; antes o nome era usado como caminho e o `.dproj` não era encontrado.
 - Builds em ambiente não-interativo (sem TTY) não quebram mais com `ERR_USE_AFTER_CLOSE`: quando não há terminal interativo, os valores default das perguntas são aplicados em vez de abrir prompt.
+- `validate-commands` passa a derivar o nome do projeto da mesma fonte que o build real (caminho resolvido), garantindo que os comandos inspecionados sejam idênticos aos executados mesmo quando a chave do projeto difere do basename do caminho.
+- No modo `--attach`, falha ao iniciar o EXE (ex.: inexistente) agora exibe uma mensagem clara em vez de silenciar.
