@@ -32,6 +32,7 @@ const DEFAULT_CONFIG_BASE = {
   libAlterdata: '${libRoot}\\LibAlterdata\\1.0.0',
   exeOutputDir: 'C:\\Temp\\${envVersion}\\EXE',
   dcuOutputDir: 'C:\\Temp\\${envVersion}\\DCU',
+  stacktraceReportDir: '${userProfile}\\EurekaLog',
 };
 
 export function buildDefaultDependencyPaths(params: Pick<Config, 'repoBase' | 'delphiDir' | 'libExternos' | 'libErp' | 'libAlterdata'>): string[] {

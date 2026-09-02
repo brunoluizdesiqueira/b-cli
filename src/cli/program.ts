@@ -106,7 +106,8 @@ export async function runCli(argv: string[]): Promise<void> {
     .option('-t, --type <FAST|DEBUG|RELEASE>', 'Modo de build')
     .option('-p, --project <path>', 'Caminho do projeto (ex: faturamento\\BimerFaturamento)')
     .option('--exe-version <version>', 'Versão a injetar no EXE (ex: 11.3.0)')
-    .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)'),
+    .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)')
+    .option('--attach', 'Inicia o EXE anexado ao terminal (exibe logs/stacktrace; ocupa o terminal até encerrar). Só afeta FAST/DEBUG'),
     HELP_EXAMPLES.build
   )
     .action(async (opts) => {
@@ -115,7 +116,7 @@ export async function runCli(argv: string[]): Promise<void> {
         fatal(`Tipo de build inválido: "${opts.type}". Use FAST, DEBUG ou RELEASE.`);
       }
 
-      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion, opts.showWarnings);
+      const resolved = await promptBuild(config, buildType, opts.project, opts.exeVersion, opts.showWarnings, opts.attach);
       await executeBuild(resolved);
     });
 
@@ -126,8 +127,9 @@ export async function runCli(argv: string[]): Promise<void> {
       .option('-p, --project <path>', 'Caminho do projeto')
       .option('--exe-version <version>', 'Versão a injetar no EXE')
       .option('--show-warnings', 'Não suprime hints/warnings do compilador (reporta no resumo)')
+      .option('--attach', 'Inicia o EXE anexado ao terminal (exibe logs/stacktrace; ocupa o terminal até encerrar). Só afeta FAST/DEBUG')
       .action(async (opts) => {
-        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion, opts.showWarnings);
+        const resolved = await promptBuild(config, type.toUpperCase() as BuildType, opts.project, opts.exeVersion, opts.showWarnings, opts.attach);
         await executeBuild(resolved);
       });
 

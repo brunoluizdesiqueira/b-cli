@@ -4,7 +4,50 @@ import inquirer from 'inquirer';
 import { buildDefaultDependencyPaths, resolveLibTemplate, saveConfig } from '../config/config';
 import { BuildOptions, BuildType, Config } from '../types';
 
-export async function promptBuild(config: Config, cliType?: string, cliProject?: string, cliVersion?: string, showWarnings?: boolean): Promise<BuildOptions> {
+/**
+ * Resolve o projeto informado pelo usuário. Aceita tanto o NOME (chave em
+ * config.projects, ex.: "BimerFaturamento") quanto o CAMINHO relativo
+ * (ex.: "faturamento\\BimerFaturamento"). Se o valor casar com uma chave
+ * conhecida, retorna o caminho correspondente; caso contrário, retorna o
+ * próprio valor (permitindo caminhos arbitrários). Função pura para teste.
+ */
+export function resolveProjectInput(
+  input: string,
+  projects: Record<string, string>,
+): string {
+  return (input && projects[input]) || input;
+}
+
+/**
+ * Indica se o processo está rodando em um terminal interativo. Quando falso
+ * (ex.: pipe, CI, execução programática), não é possível abrir prompts do
+ * inquirer — tentar fazê-lo quebra com ERR_USE_AFTER_CLOSE. Nesses casos o
+ * CLI deve usar os valores default em vez de perguntar.
+ */
+export function isInteractive(): boolean {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
+}
+
+/**
+ * Deriva as respostas default para perguntas do inquirer sem interação.
+ * Usa a propriedade `default` de cada pergunta (ou a primeira escolha de uma
+ * lista, como o inquirer faria). Função pura para permitir teste unitário.
+ */
+export function defaultAnswers(
+  questions: Array<{ name: string; default?: unknown; choices?: Array<{ value: unknown }> }>,
+): Record<string, unknown> {
+  const answers: Record<string, unknown> = {};
+  for (const q of questions) {
+    if (q.default !== undefined) {
+      answers[q.name] = q.default;
+    } else if (q.choices && q.choices.length > 0) {
+      answers[q.name] = q.choices[0].value;
+    }
+  }
+  return answers;
+}
+
+export async function promptBuild(config: Config, cliType?: string, cliProject?: string, cliVersion?: string, showWarnings?: boolean, attach?: boolean): Promise<BuildOptions> {
   const questions: inquirer.QuestionCollection[] = [];
   const projectChoices = Object.entries(config.projects).map(([name, projectPath]) => ({
     name,
@@ -44,11 +87,26 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
     });
   }
 
-  const answers = await inquirer.prompt(questions as any);
+  // Em ambiente não-interativo (sem TTY), não é possível abrir prompts sem
+  // quebrar (ERR_USE_AFTER_CLOSE). Nesse caso aplica os defaults das perguntas
+  // pendentes; havendo TTY, pergunta normalmente ao usuário.
+  const answers = questions.length === 0
+    ? {}
+    : isInteractive()
+      ? await inquirer.prompt(questions as any)
+      : defaultAnswers(questions as any);
+
+  // O --project pode vir como o NOME (chave em config.projects) ou como o
+  // CAMINHO relativo (ex.: faturamento\BimerFaturamento). Se casar com uma
+  // chave conhecida, resolve para o caminho; caso contrário usa como veio.
+  // Isso alinha o comportamento do CLI com o do modo interativo (que já usa
+  // o caminho como valor da escolha).
+  const rawProject = cliProject || answers.project;
+  const resolvedProject = resolveProjectInput(rawProject, config.projects);
 
   return {
     type: (cliType || answers.type) as BuildType,
-    project: cliProject || answers.project,
+    project: resolvedProject,
     version: cliVersion || answers.version || '',
     repoBase: config.repoBase,
     delphiDir: config.delphiDir,
@@ -61,6 +119,8 @@ export async function promptBuild(config: Config, cliType?: string, cliProject?:
     exeOutputDir: config.exeOutputDir,
     dcuOutputDir: config.dcuOutputDir,
     showWarnings: showWarnings ?? false,
+    attach: attach ?? false,
+    stacktraceReportDir: config.stacktraceReportDir,
   };
 }
 
